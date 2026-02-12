@@ -14,8 +14,12 @@ fun FoodEntity.toDomain(): Food = Food(
     protein = protein,
     carbs = carbs,
     fat = fat,
+    fiber = fiber,
     servingSize = servingSize,
-    servingUnit = servingUnit
+    servingUnit = servingUnit,
+    barcode = barcode,
+    brand = brand,
+    imageUrl = imageUrl
 )
 
 fun Food.toEntity(): FoodEntity = FoodEntity(
@@ -25,8 +29,12 @@ fun Food.toEntity(): FoodEntity = FoodEntity(
     protein = protein,
     carbs = carbs,
     fat = fat,
+    fiber = fiber,
     servingSize = servingSize,
-    servingUnit = servingUnit
+    servingUnit = servingUnit,
+    barcode = barcode,
+    brand = brand,
+    imageUrl = imageUrl
 )
 
 // FoodEntry mappings

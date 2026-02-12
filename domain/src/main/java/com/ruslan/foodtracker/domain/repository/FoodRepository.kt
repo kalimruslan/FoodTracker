@@ -5,10 +5,15 @@ import com.ruslan.foodtracker.domain.model.NetworkResult
 import kotlinx.coroutines.flow.Flow
 
 interface FoodRepository {
+    // Local database operations
     fun getAllFoods(): Flow<NetworkResult<List<Food>>>
     suspend fun getFoodById(id: Long): NetworkResult<Food>
     suspend fun insertFood(food: Food): NetworkResult<Long>
     suspend fun updateFood(food: Food): NetworkResult<Unit>
     suspend fun deleteFood(food: Food): NetworkResult<Unit>
     fun searchFoods(query: String): Flow<NetworkResult<List<Food>>>
+
+    // Remote API operations (возвращают Flow для удобной обработки состояний)
+    fun searchFoodsByNameRemote(query: String): Flow<NetworkResult<List<Food>>>
+    fun getFoodByBarcode(barcode: String): Flow<NetworkResult<Food>>
 }
