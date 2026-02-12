@@ -1,26 +1,45 @@
 package com.ruslan.foodtracker.feature.search.presenter
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.ruslan.foodtracker.core.ui.components.ProductData
+import com.ruslan.foodtracker.domain.model.Food
+import com.ruslan.foodtracker.domain.model.NetworkResult
+import com.ruslan.foodtracker.domain.usecase.food.SearchFoodsByNameUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class SearchViewModel @Inject constructor() : ViewModel() {
+class SearchViewModel @Inject constructor(
+    private val searchFoodsByNameUseCase: SearchFoodsByNameUseCase
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SearchUiState())
     val uiState: StateFlow<SearchUiState> = _uiState.asStateFlow()
 
-    init {
-        loadMockData()
-    }
+    private var searchJob: Job? = null
 
     fun onSearchQueryChanged(query: String) {
         _uiState.value = _uiState.value.copy(searchQuery = query)
-        // TODO: Search products
+
+        // Отменяем предыдущий поиск
+        searchJob?.cancel()
+
+        // Debounce - ждем 500ms после ввода
+        searchJob = viewModelScope.launch {
+            delay(500)
+            if (query.length >= 2) {
+                searchProducts(query)
+            } else {
+                _uiState.value = _uiState.value.copy(products = emptyList())
+            }
+        }
     }
 
     fun onTabSelected(tab: SearchTab) {
@@ -38,18 +57,55 @@ class SearchViewModel @Inject constructor() : ViewModel() {
         // TODO: Save to repository
     }
 
-    private fun loadMockData() {
-        _uiState.value = SearchUiState(
-            products = listOf(
-                ProductData("1", "Куриная грудка", "без бренда", "100г", 110, 23.1f, 1.2f, 0f, false),
-                ProductData("2", "Рис бурый варёный", "без бренда", "100г", 120, 2.6f, 0.8f, 24.7f, false),
-                ProductData("3", "Гречневая каша", "без бренда", "100г", 132, 4.5f, 2.3f, 25.0f, false),
-                ProductData("4", "Творог 5%", "Домик в деревне", "100г", 121, 17.2f, 5.0f, 1.8f, true),
-                ProductData("5", "Яйцо куриное", "без бренда", "100г", 155, 12.6f, 10.6f, 0.7f, false),
-                ProductData("6", "Овсянка на воде", "без бренда", "100г", 88, 3.0f, 1.7f, 15.0f, false)
-            )
-        )
+    private fun searchProducts(query: String) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+
+            when (val result = searchFoodsByNameUseCase(query)) {
+                is NetworkResult.Success -> {
+                    val productDataList = result.data.map { it.toProductData() }
+                    _uiState.value = _uiState.value.copy(
+                        products = productDataList,
+                        isLoading = false,
+                        error = null
+                    )
+                }
+                is NetworkResult.Error -> {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        error = result.message
+                    )
+                }
+                is NetworkResult.Loading -> {
+                    _uiState.value = _uiState.value.copy(isLoading = true)
+                }
+                is NetworkResult.Empty -> {
+                    _uiState.value = _uiState.value.copy(
+                        products = emptyList(),
+                        isLoading = false,
+                        error = "Продукты не найдены"
+                    )
+                }
+            }
+        }
     }
+}
+
+/**
+ * Маппинг Food модели в ProductData для UI
+ */
+private fun Food.toProductData(): ProductData {
+    return ProductData(
+        id = id.toString(),
+        name = name,
+        brand = brand,
+        portion = "${servingSize.toInt()}$servingUnit",
+        calories = calories,
+        protein = protein.toFloat(),
+        fat = fat.toFloat(),
+        carbs = carbs.toFloat(),
+        isFavorite = false // TODO: Проверить в избранном
+    )
 }
 
 data class SearchUiState(
