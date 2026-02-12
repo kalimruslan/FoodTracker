@@ -22,12 +22,15 @@ fun ProductDto.toDomain(): Food? {
     val protein = nutriments.proteins100g ?: 0.0
     val carbs = nutriments.carbohydrates100g ?: 0.0
     val fat = nutriments.fat100g ?: 0.0
+    val fiber = nutriments.fiber100g ?: 0.0
 
     // Парсим serving size (например, "100g" -> 100.0)
     val (servingSize, servingUnit) = parseServingSize(this.servingSize)
 
-    // TODO: Добавить маппинг для barcode, brand, imageUrl, fiber
-    // когда эти поля будут добавлены в Food модель
+    // Извлекаем дополнительные данные
+    val barcode = this.code
+    val brand = this.brands
+    val imageUrl = this.imageFrontUrl ?: this.imageUrl
 
     return Food(
         id = 0, // ID назначается при сохранении в Room
@@ -36,8 +39,12 @@ fun ProductDto.toDomain(): Food? {
         protein = protein,
         carbs = carbs,
         fat = fat,
+        fiber = fiber,
         servingSize = servingSize,
-        servingUnit = servingUnit
+        servingUnit = servingUnit,
+        barcode = barcode,
+        brand = brand,
+        imageUrl = imageUrl
     )
 }
 

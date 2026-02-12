@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.ruslan.foodtracker.core.common.util.Constants
 import com.ruslan.foodtracker.data.local.FoodTrackerDatabase
+import com.ruslan.foodtracker.data.local.MIGRATION_1_2
 import com.ruslan.foodtracker.data.local.dao.FoodDao
 import com.ruslan.foodtracker.data.local.dao.FoodEntryDao
 import dagger.Module
@@ -26,7 +27,9 @@ object DatabaseModule {
             context,
             FoodTrackerDatabase::class.java,
             Constants.DATABASE_NAME
-        ).build()
+        )
+            .addMigrations(MIGRATION_1_2)
+            .build()
     }
 
     @Provides
