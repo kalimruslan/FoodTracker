@@ -3,6 +3,8 @@ package com.ruslan.foodtracker.domain.usecase.food
 import com.ruslan.foodtracker.domain.model.Food
 import com.ruslan.foodtracker.domain.model.NetworkResult
 import com.ruslan.foodtracker.domain.repository.FoodRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import javax.inject.Inject
 
 /**
@@ -20,23 +22,23 @@ class SearchFoodByBarcodeUseCase @Inject constructor(
      * Поиск продукта по штрих-коду
      *
      * @param barcode Штрих-код продукта (EAN-13, EAN-8, UPC-A и т.д.)
-     * @return NetworkResult с найденным продуктом
+     * @return Flow<NetworkResult> с найденным продуктом
      */
-    suspend operator fun invoke(barcode: String): NetworkResult<Food> {
+    operator fun invoke(barcode: String): Flow<NetworkResult<Food>> {
         // Валидация штрих-кода
         if (barcode.isBlank()) {
-            return NetworkResult.Error("Штрих-код не может быть пустым")
+            return flowOf(NetworkResult.Error("Штрих-код не может быть пустым"))
         }
 
         // Проверка формата (базовая валидация длины)
         val cleanBarcode = barcode.trim()
         if (cleanBarcode.length !in 8..13) {
-            return NetworkResult.Error("Некорректный формат штрих-кода (должен быть 8-13 символов)")
+            return flowOf(NetworkResult.Error("Некорректный формат штрих-кода (должен быть 8-13 символов)"))
         }
 
         // Проверка что штрих-код содержит только цифры
         if (!cleanBarcode.all { it.isDigit() }) {
-            return NetworkResult.Error("Штрих-код должен содержать только цифры")
+            return flowOf(NetworkResult.Error("Штрих-код должен содержать только цифры"))
         }
 
         return repository.getFoodByBarcode(cleanBarcode)

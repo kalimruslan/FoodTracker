@@ -13,7 +13,7 @@ interface FoodRepository {
     suspend fun deleteFood(food: Food): NetworkResult<Unit>
     fun searchFoods(query: String): Flow<NetworkResult<List<Food>>>
 
-    // Remote API operations
-    suspend fun searchFoodsByNameRemote(query: String): NetworkResult<List<Food>>
-    suspend fun getFoodByBarcode(barcode: String): NetworkResult<Food>
+    // Remote API operations (возвращают Flow для удобной обработки состояний)
+    fun searchFoodsByNameRemote(query: String): Flow<NetworkResult<List<Food>>>
+    fun getFoodByBarcode(barcode: String): Flow<NetworkResult<Food>>
 }

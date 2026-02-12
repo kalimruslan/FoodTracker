@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ruslan.foodtracker.core.ui.components.ProductData
 import com.ruslan.foodtracker.domain.model.Food
-import com.ruslan.foodtracker.domain.model.NetworkResult
+import com.ruslan.foodtracker.domain.model.doActionIfError
+import com.ruslan.foodtracker.domain.model.doActionIfLoading
+import com.ruslan.foodtracker.domain.model.doActionIfSuccess
 import com.ruslan.foodtracker.domain.usecase.food.SearchFoodsByNameUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -37,7 +39,7 @@ class SearchViewModel @Inject constructor(
             if (query.length >= 2) {
                 searchProducts(query)
             } else {
-                _uiState.value = _uiState.value.copy(products = emptyList())
+                _uiState.value = _uiState.value.copy(products = emptyList(), isLoading = false, error = null)
             }
         }
     }
@@ -59,31 +61,30 @@ class SearchViewModel @Inject constructor(
 
     private fun searchProducts(query: String) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+            searchFoodsByNameUseCase(query).collect { result ->
+                // Обработка состояния Loading
+                result.doActionIfLoading {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = true,
+                        error = null
+                    )
+                }
 
-            when (val result = searchFoodsByNameUseCase(query)) {
-                is NetworkResult.Success -> {
-                    val productDataList = result.data.map { it.toProductData() }
+                // Обработка успешного результата
+                result.doActionIfSuccess { foods ->
+                    val productDataList = foods.map { it.toProductData() }
                     _uiState.value = _uiState.value.copy(
                         products = productDataList,
                         isLoading = false,
                         error = null
                     )
                 }
-                is NetworkResult.Error -> {
+
+                // Обработка ошибки
+                result.doActionIfError { errorMessage ->
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        error = result.message
-                    )
-                }
-                is NetworkResult.Loading -> {
-                    _uiState.value = _uiState.value.copy(isLoading = true)
-                }
-                is NetworkResult.Empty -> {
-                    _uiState.value = _uiState.value.copy(
-                        products = emptyList(),
-                        isLoading = false,
-                        error = "Продукты не найдены"
+                        error = errorMessage
                     )
                 }
             }
