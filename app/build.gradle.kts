@@ -51,6 +51,12 @@ dependencies {
     implementation(project(":data"))
     implementation(project(":core:common"))
     implementation(project(":core:ui"))
+    implementation(project(":core:navigation"))
+    implementation(project(":feature:home"))
+    implementation(project(":feature:search"))
+    implementation(project(":feature:product"))
+    implementation(project(":feature:stats"))
+    implementation(project(":feature:profile"))
 
     // Core
     implementation(libs.androidx.core.ktx)

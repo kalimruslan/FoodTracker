@@ -1,12 +1,7 @@
 *.iml
 .gradle
 /local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
+/.idea/
 .DS_Store
 /build
 /captures
@@ -14,3 +9,16 @@
 .cxx
 local.properties
 .claude
+
+# Build folders for all modules
+/app/build/
+/domain/build/
+/data/build/
+/core/common/build/
+/core/ui/build/
+/core/navigation/build/
+/feature/home/build/
+/feature/search/build/
+/feature/product/build/
+/feature/stats/build/
+/feature/profile/build/
