@@ -81,10 +81,10 @@ class SearchViewModel @Inject constructor(
                 }
 
                 // Обработка ошибки
-                result.doActionIfError { errorMessage ->
+                result.doActionIfError { domainError ->
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        error = errorMessage
+                        error = domainError.toString() // TODO: Заменить на ErrorMapper при реализации Этапа 2
                     )
                 }
             }
