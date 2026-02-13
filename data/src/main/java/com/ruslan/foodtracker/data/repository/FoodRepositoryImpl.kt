@@ -105,7 +105,8 @@ class FoodRepositoryImpl @Inject constructor(
 
     /**
      * Поиск продуктов по названию через Open Food Facts API
-     * Только запрос к API, без кэширования (кэширование в UseCase)
+     * Только запрос к API и маппинг DTO -> Domain
+     * Fallback логика находится в UseCase
      */
     override fun searchFoodsByNameRemote(query: String): Flow<NetworkResult<List<Food>>> =
         remoteDataSource.searchProducts(query, pageSize = 20)
@@ -113,24 +114,11 @@ class FoodRepositoryImpl @Inject constructor(
                 // Маппинг DTO -> Domain
                 response.products?.toDomainList() ?: emptyList()
             }
-            .catch { exception ->
-                // Fallback на локальный кэш при ошибке сети
-                localDataSource.searchFoods(query).collect { entities ->
-                    val localFoods = entities.map { it.toDomain() }
-                    if (localFoods.isNotEmpty()) {
-                        emit(NetworkResult.Success(localFoods))
-                    } else {
-                        emit(NetworkResult.Error(
-                            message = "Нет подключения к интернету и нет кэшированных данных",
-                            exception = exception
-                        ))
-                    }
-                }
-            }
 
     /**
      * Получение продукта по штрих-коду через Open Food Facts API
-     * Только запрос к API, без кэширования (кэширование в UseCase)
+     * Только запрос к API и маппинг DTO -> Domain
+     * Fallback логика находится в UseCase
      */
     override fun getFoodByBarcode(barcode: String): Flow<NetworkResult<Food>> =
         remoteDataSource.getProductByBarcode(barcode)
@@ -143,19 +131,5 @@ class FoodRepositoryImpl @Inject constructor(
                 // Маппинг DTO -> Domain
                 response.product.toDomain()
                     ?: throw IllegalStateException("Не удалось обработать данные продукта")
-            }
-            .catch { exception ->
-                // Fallback на локальный поиск по barcode
-                localDataSource.getAllFoods().collect { entities ->
-                    val foundFood = entities.find { it.barcode == barcode }?.toDomain()
-                    if (foundFood != null) {
-                        emit(NetworkResult.Success(foundFood))
-                    } else {
-                        emit(NetworkResult.Error(
-                            message = "Продукт не найден ни в API, ни в локальном кэше",
-                            exception = exception
-                        ))
-                    }
-                }
             }
 }
