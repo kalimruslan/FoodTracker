@@ -131,15 +131,24 @@ class FoodRepositoryImpl @Inject constructor(
     // ========== REMOTE API OPERATIONS ==========
 
     /**
-     * Поиск продуктов по названию через Open Food Facts API
+     * Поиск продуктов по названию через Open Food Facts API с пагинацией
      * Только запрос к API и маппинг DTO -> Domain
      * Fallback логика находится в UseCase
+     *
+     * @param query Поисковый запрос
+     * @param page Номер страницы (начинается с 1)
      */
-    override fun searchFoodsByNameRemote(query: String): Flow<NetworkResult<List<Food>>> =
-        remoteDataSource.searchProducts(query, pageSize = 20)
+    override fun searchFoodsByNameRemote(query: String, page: Int): Flow<NetworkResult<com.ruslan.foodtracker.domain.model.PaginatedResult<Food>>> =
+        remoteDataSource.searchProducts(query, page = page, pageSize = 20)
             .mapNetworkResult { response ->
-                // Маппинг DTO -> Domain
-                response.products?.toDomainList() ?: emptyList()
+                // Маппинг SearchResponse -> PaginatedResult<Food>
+                com.ruslan.foodtracker.domain.model.PaginatedResult(
+                    data = response.products?.toDomainList() ?: emptyList(),
+                    currentPage = response.page ?: 1,
+                    totalPages = response.pageCount ?: 1,
+                    pageSize = response.pageSize ?: 20,
+                    totalCount = response.count ?: 0
+                )
             }
 
     /**

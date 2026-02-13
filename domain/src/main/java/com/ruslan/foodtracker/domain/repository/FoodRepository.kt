@@ -2,6 +2,7 @@ package com.ruslan.foodtracker.domain.repository
 
 import com.ruslan.foodtracker.domain.model.Food
 import com.ruslan.foodtracker.domain.model.NetworkResult
+import com.ruslan.foodtracker.domain.model.PaginatedResult
 import kotlinx.coroutines.flow.Flow
 
 interface FoodRepository {
@@ -16,6 +17,6 @@ interface FoodRepository {
     fun searchFoods(query: String): Flow<NetworkResult<List<Food>>>
 
     // Remote API operations (возвращают Flow для удобной обработки состояний)
-    fun searchFoodsByNameRemote(query: String): Flow<NetworkResult<List<Food>>>
+    fun searchFoodsByNameRemote(query: String, page: Int = 1): Flow<NetworkResult<PaginatedResult<Food>>>
     fun getFoodByBarcode(barcode: String): Flow<NetworkResult<Food>>
 }

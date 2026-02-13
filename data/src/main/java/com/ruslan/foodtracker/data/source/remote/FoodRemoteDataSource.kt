@@ -19,14 +19,16 @@ class FoodRemoteDataSource @Inject constructor(
      * Поиск продуктов по названию через API
      *
      * @param query Поисковый запрос
+     * @param page Номер страницы (начинается с 1)
      * @param pageSize Количество результатов на странице
-     * @return Flow с SearchResponse (содержит список ProductDto)
+     * @return Flow с SearchResponse (содержит список ProductDto и информацию о пагинации)
      */
     fun searchProducts(
         query: String,
+        page: Int = 1,
         pageSize: Int = 20
     ): Flow<NetworkResult<SearchResponse>> =
-        handleApi { api.searchProducts(searchTerms = query, pageSize = pageSize) }
+        handleApi { api.searchProducts(searchTerms = query, page = page, pageSize = pageSize) }
 
     /**
      * Получить продукт по штрих-коду через API

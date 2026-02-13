@@ -38,9 +38,16 @@ class SearchViewModel @Inject constructor(
         searchJob = viewModelScope.launch {
             delay(500)
             if (query.length >= 2) {
-                searchProducts(query)
+                searchProducts(query, page = 1, isInitialSearch = true)
             } else {
-                _uiState.value = _uiState.value.copy(products = emptyList(), isLoading = false, error = null)
+                _uiState.value = _uiState.value.copy(
+                    products = emptyList(),
+                    isLoading = false,
+                    error = null,
+                    currentPage = 1,
+                    hasNextPage = false,
+                    isFromCache = false
+                )
             }
         }
     }
@@ -60,33 +67,125 @@ class SearchViewModel @Inject constructor(
         // TODO: Save to repository
     }
 
-    private fun searchProducts(query: String) {
+    /**
+     * Загрузка следующей страницы результатов
+     */
+    fun loadNextPage() {
+        val currentState = _uiState.value
+
+        // Проверки перед загрузкой
+        if (currentState.isLoadingMore || !currentState.hasNextPage || currentState.isFromCache) {
+            return
+        }
+
+        val query = currentState.searchQuery
+        if (query.length < 2) {
+            return
+        }
+
+        searchProducts(query, page = currentState.currentPage + 1, isInitialSearch = false)
+    }
+
+    /**
+     * Повторить поиск при ошибке
+     */
+    fun onRetrySearch() {
+        val query = _uiState.value.searchQuery
+        if (query.length >= 2) {
+            searchProducts(query, page = 1, isInitialSearch = true)
+        }
+    }
+
+    /**
+     * Закрыть диалог с ошибкой
+     */
+    fun onDismissError() {
+        _uiState.value = _uiState.value.copy(error = null)
+    }
+
+    /**
+     * Повторить загрузку следующей страницы при ошибке пагинации
+     */
+    fun onRetryPagination() {
+        val currentState = _uiState.value
+        val query = currentState.searchQuery
+
+        if (query.length >= 2 && currentState.paginationError != null) {
+            // Очищаем ошибку пагинации и пробуем загрузить ту же страницу снова
+            _uiState.value = _uiState.value.copy(paginationError = null)
+            searchProducts(query, page = currentState.currentPage + 1, isInitialSearch = false)
+        }
+    }
+
+    /**
+     * Закрыть ошибку пагинации
+     */
+    fun onDismissPaginationError() {
+        _uiState.value = _uiState.value.copy(paginationError = null)
+    }
+
+    private fun searchProducts(query: String, page: Int, isInitialSearch: Boolean) {
         viewModelScope.launch {
-            searchFoodsByNameUseCase(query).collect { result ->
+            searchFoodsByNameUseCase(query, page).collect { result ->
                 // Обработка состояния Loading
                 result.doActionIfLoading {
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = true,
-                        error = null
-                    )
+                    if (isInitialSearch) {
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = true,
+                            error = null,
+                            isFromCache = false
+                        )
+                    } else {
+                        _uiState.value = _uiState.value.copy(
+                            isLoadingMore = true,
+                            paginationError = null
+                        )
+                    }
                 }
 
                 // Обработка успешного результата
-                result.doActionIfSuccess { foods ->
-                    val productDataList = foods.map { it.toProductData() }
-                    _uiState.value = _uiState.value.copy(
-                        products = productDataList,
-                        isLoading = false,
-                        error = null
-                    )
+                result.doActionIfSuccess { paginatedResult ->
+                    val productDataList = paginatedResult.data.map { it.toProductData() }
+
+                    // Проверяем, из кэша ли результаты (одна страница и totalPages == 1)
+                    val isFromCache = paginatedResult.totalPages == 1 && paginatedResult.totalCount == paginatedResult.data.size
+
+                    if (isInitialSearch) {
+                        // Первая загрузка - заменяем список
+                        _uiState.value = _uiState.value.copy(
+                            products = productDataList,
+                            isLoading = false,
+                            error = null,
+                            currentPage = paginatedResult.currentPage,
+                            hasNextPage = paginatedResult.hasNextPage,
+                            isFromCache = isFromCache
+                        )
+                    } else {
+                        // Загрузка следующей страницы - добавляем в конец списка
+                        _uiState.value = _uiState.value.copy(
+                            products = _uiState.value.products + productDataList,
+                            isLoadingMore = false,
+                            paginationError = null,
+                            currentPage = paginatedResult.currentPage,
+                            hasNextPage = paginatedResult.hasNextPage
+                        )
+                    }
                 }
 
                 // Обработка ошибки
                 result.doActionIfError { domainError ->
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        error = domainError
-                    )
+                    if (isInitialSearch) {
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            error = domainError,
+                            isFromCache = false
+                        )
+                    } else {
+                        _uiState.value = _uiState.value.copy(
+                            isLoadingMore = false,
+                            paginationError = domainError
+                        )
+                    }
                 }
             }
         }
@@ -115,7 +214,13 @@ data class SearchUiState(
     val selectedTab: SearchTab = SearchTab.SEARCH,
     val products: List<ProductData> = emptyList(),
     val isLoading: Boolean = false,
-    val error: DomainError? = null // TODO: В UI слое конвертировать в строку через error.toMessage(context)
+    val error: DomainError? = null,
+    // Pagination fields
+    val currentPage: Int = 1,
+    val hasNextPage: Boolean = false,
+    val isLoadingMore: Boolean = false,
+    val paginationError: DomainError? = null,
+    val isFromCache: Boolean = false // Индикатор, что результаты из локального кэша
 )
 
 enum class SearchTab(val label: String, val icon: String) {

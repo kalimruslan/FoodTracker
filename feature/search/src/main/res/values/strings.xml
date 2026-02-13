@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ========== SCREEN TITLE ========== -->
+    <string name="search_screen_title">Добавить продукт</string>
+    <string name="search_back_button">Назад</string>
+
+    <!-- ========== SEARCH BAR ========== -->
+    <string name="search_placeholder">Найти продукт...</string>
+    <string name="search_barcode_scan">Сканировать штрихкод</string>
+
+    <!-- ========== TABS ========== -->
+    <string name="search_tab_search">Поиск</string>
+    <string name="search_tab_recent">Недавние</string>
+    <string name="search_tab_favorites">Избранное</string>
+    <string name="search_tab_recipes">Рецепты</string>
+
+    <!-- ========== STATES ========== -->
+    <string name="search_empty_state">Введите запрос для поиска продуктов</string>
+    <string name="search_no_results">Ничего не найдено</string>
+    <string name="search_loading">Загрузка...</string>
+    <string name="search_loading_more">Загрузка еще...</string>
+
+    <!-- ========== PAGINATION ========== -->
+    <string name="search_load_more">Загрузить еще</string>
+    <string name="search_end_of_results">Это все результаты</string>
+    <string name="search_from_cache">Результаты из кэша</string>
+
+    <!-- ========== ERROR DIALOG ========== -->
+    <string name="search_error_title">Ошибка</string>
+    <string name="search_error_retry">Повторить</string>
+    <string name="search_error_dismiss">Закрыть</string>
+
+    <!-- ========== PAGINATION ERROR ========== -->
+    <string name="search_pagination_error">Не удалось загрузить следующую страницу</string>
+    <string name="search_pagination_retry">Повторить попытку</string>
+</resources>
