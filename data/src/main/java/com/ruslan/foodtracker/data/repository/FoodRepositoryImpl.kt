@@ -6,6 +6,7 @@ import com.ruslan.foodtracker.data.remote.mapper.toDomain
 import com.ruslan.foodtracker.data.remote.mapper.toDomainList
 import com.ruslan.foodtracker.data.source.local.FoodLocalDataSource
 import com.ruslan.foodtracker.data.source.remote.FoodRemoteDataSource
+import com.ruslan.foodtracker.domain.error.DomainError
 import com.ruslan.foodtracker.domain.model.Food
 import com.ruslan.foodtracker.domain.model.NetworkResult
 import com.ruslan.foodtracker.domain.model.mapNetworkResult
@@ -39,7 +40,7 @@ class FoodRepositoryImpl @Inject constructor(
             .onStart { emit(NetworkResult.Loading) }
             .catch { e ->
                 emit(NetworkResult.Error(
-                    message = e.message ?: "Ошибка при загрузке продуктов",
+                    error = DomainError.Database.FetchFailed,
                     exception = e
                 ))
             }
@@ -49,11 +50,11 @@ class FoodRepositoryImpl @Inject constructor(
         if (entity != null) {
             NetworkResult.Success(entity.toDomain())
         } else {
-            NetworkResult.Error("Продукт не найден")
+            NetworkResult.Error(DomainError.Database.NotFound)
         }
     } catch (e: Exception) {
         NetworkResult.Error(
-            message = e.message ?: "Ошибка при загрузке продукта",
+            error = DomainError.Database.FetchFailed,
             exception = e
         )
     }
@@ -63,11 +64,11 @@ class FoodRepositoryImpl @Inject constructor(
         if (entity != null) {
             NetworkResult.Success(entity.toDomain())
         } else {
-            NetworkResult.Error("Продукт с таким штрих-кодом не найден в локальной БД")
+            NetworkResult.Error(DomainError.Database.BarcodeNotFound)
         }
     } catch (e: Exception) {
         NetworkResult.Error(
-            message = e.message ?: "Ошибка при поиске продукта по штрих-коду",
+            error = DomainError.Database.SearchFailed,
             exception = e
         )
     }
@@ -77,7 +78,7 @@ class FoodRepositoryImpl @Inject constructor(
         NetworkResult.Success(id)
     } catch (e: Exception) {
         NetworkResult.Error(
-            message = e.message ?: "Ошибка при добавлении продукта",
+            error = DomainError.Database.InsertFailed,
             exception = e
         )
     }
@@ -89,7 +90,7 @@ class FoodRepositoryImpl @Inject constructor(
         NetworkResult.Success(ids)
     } catch (e: Exception) {
         NetworkResult.Error(
-            message = e.message ?: "Ошибка при массовом добавлении продуктов",
+            error = DomainError.Database.InsertFailed,
             exception = e
         )
     }
@@ -99,7 +100,7 @@ class FoodRepositoryImpl @Inject constructor(
         NetworkResult.Success(Unit)
     } catch (e: Exception) {
         NetworkResult.Error(
-            message = e.message ?: "Ошибка при обновлении продукта",
+            error = DomainError.Database.UpdateFailed,
             exception = e
         )
     }
@@ -109,7 +110,7 @@ class FoodRepositoryImpl @Inject constructor(
         NetworkResult.Success(Unit)
     } catch (e: Exception) {
         NetworkResult.Error(
-            message = e.message ?: "Ошибка при удалении продукта",
+            error = DomainError.Database.DeleteFailed,
             exception = e
         )
     }
@@ -122,7 +123,7 @@ class FoodRepositoryImpl @Inject constructor(
             .onStart { emit(NetworkResult.Loading) }
             .catch { e ->
                 emit(NetworkResult.Error(
-                    message = e.message ?: "Ошибка при поиске продуктов",
+                    error = DomainError.Database.SearchFailed,
                     exception = e
                 ))
             }
@@ -154,14 +155,14 @@ class FoodRepositoryImpl @Inject constructor(
                         val response = result.data
                         // Проверяем успешность ответа API
                         if (response.status != 1 || response.product == null) {
-                            NetworkResult.Error("Продукт с таким штрих-кодом не найден в базе Open Food Facts")
+                            NetworkResult.Error(DomainError.Data.ProductNotFound)
                         } else {
                             // Маппинг DTO -> Domain
                             val food = response.product.toDomain()
                             if (food != null) {
                                 NetworkResult.Success(food)
                             } else {
-                                NetworkResult.Error("Не удалось обработать данные продукта")
+                                NetworkResult.Error(DomainError.Data.ParseError)
                             }
                         }
                     }

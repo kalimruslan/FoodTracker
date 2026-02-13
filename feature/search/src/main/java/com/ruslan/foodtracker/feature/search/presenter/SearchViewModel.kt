@@ -3,6 +3,7 @@ package com.ruslan.foodtracker.feature.search.presenter
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ruslan.foodtracker.core.ui.components.ProductData
+import com.ruslan.foodtracker.domain.error.DomainError
 import com.ruslan.foodtracker.domain.model.Food
 import com.ruslan.foodtracker.domain.model.doActionIfError
 import com.ruslan.foodtracker.domain.model.doActionIfLoading
@@ -81,10 +82,10 @@ class SearchViewModel @Inject constructor(
                 }
 
                 // Обработка ошибки
-                result.doActionIfError { errorMessage ->
+                result.doActionIfError { domainError ->
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        error = errorMessage
+                        error = domainError
                     )
                 }
             }
@@ -114,7 +115,7 @@ data class SearchUiState(
     val selectedTab: SearchTab = SearchTab.SEARCH,
     val products: List<ProductData> = emptyList(),
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: DomainError? = null // TODO: В UI слое конвертировать в строку через error.toMessage(context)
 )
 
 enum class SearchTab(val label: String, val icon: String) {

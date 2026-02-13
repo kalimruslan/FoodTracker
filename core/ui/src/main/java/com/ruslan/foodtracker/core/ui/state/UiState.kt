@@ -1,5 +1,8 @@
 package com.ruslan.foodtracker.core.ui.state
 
+import android.content.Context
+import com.ruslan.foodtracker.core.ui.error.toMessage
+import com.ruslan.foodtracker.domain.error.DomainError
 import com.ruslan.foodtracker.domain.model.NetworkResult
 
 /**
@@ -22,9 +25,43 @@ sealed class UiState<out T> {
     data class Success<T>(val data: T) : UiState<T>()
 
     /**
-     * Ошибка при загрузке
+     * Ошибка при загрузке с типизированной ошибкой
+     *
+     * @property error - типизированная ошибка из domain слоя
      */
-    data class Error(val message: String) : UiState<Nothing>()
+    data class Error(val error: DomainError) : UiState<Nothing>() {
+        /**
+         * Deprecated конструктор для обратной совместимости
+         *
+         * @param message - текстовое сообщение (будет обёрнуто в DomainError.Data.ParseError)
+         */
+        @Deprecated(
+            message = "Use constructor with DomainError instead of String message",
+            replaceWith = ReplaceWith("Error(DomainError.Data.ParseError)"),
+            level = DeprecationLevel.WARNING
+        )
+        constructor(message: String) : this(DomainError.Data.ParseError)
+
+        /**
+         * Получить legacy message для обратной совместимости
+         * @deprecated Используйте error.toMessage(context) вместо message
+         */
+        @Deprecated(
+            message = "Use error.toMessage(context) for localized message",
+            replaceWith = ReplaceWith("error.toMessage(context)"),
+            level = DeprecationLevel.WARNING
+        )
+        val message: String
+            get() = error.toString()
+
+        /**
+         * Получить локализованное сообщение об ошибке
+         *
+         * @param context - Android Context для доступа к ресурсам
+         * @return Локализованное сообщение из строковых ресурсов
+         */
+        fun getMessage(context: Context): String = error.toMessage(context)
+    }
 
     /**
      * Пустой результат
@@ -37,7 +74,7 @@ sealed class UiState<out T> {
  */
 fun <T> NetworkResult<T>.toUiState(): UiState<T> = when (this) {
     is NetworkResult.Success -> UiState.Success(data)
-    is NetworkResult.Error -> UiState.Error(message)
+    is NetworkResult.Error -> UiState.Error(error)
     is NetworkResult.Loading -> UiState.Loading
     is NetworkResult.Empty -> UiState.Empty
 }

@@ -1,5 +1,6 @@
 package com.ruslan.foodtracker.domain.usecase.food
 
+import com.ruslan.foodtracker.domain.error.DomainError
 import com.ruslan.foodtracker.domain.model.Food
 import com.ruslan.foodtracker.domain.model.NetworkResult
 import com.ruslan.foodtracker.domain.repository.FoodRepository
@@ -28,18 +29,18 @@ class SearchFoodByBarcodeUseCase @Inject constructor(
     operator fun invoke(barcode: String): Flow<NetworkResult<Food>> {
         // Валидация штрих-кода
         if (barcode.isBlank()) {
-            return flowOf(NetworkResult.Error("Штрих-код не может быть пустым"))
+            return flowOf(NetworkResult.Error(DomainError.Validation.EmptyQuery))
         }
 
         // Проверка формата (базовая валидация длины)
         val cleanBarcode = barcode.trim()
         if (cleanBarcode.length !in 8..13) {
-            return flowOf(NetworkResult.Error("Некорректный формат штрих-кода (должен быть 8-13 символов)"))
+            return flowOf(NetworkResult.Error(DomainError.Validation.InvalidBarcode))
         }
 
         // Проверка что штрих-код содержит только цифры
         if (!cleanBarcode.all { it.isDigit() }) {
-            return flowOf(NetworkResult.Error("Штрих-код должен содержать только цифры"))
+            return flowOf(NetworkResult.Error(DomainError.Validation.InvalidBarcode))
         }
 
         // Remote-first поиск с кэшированием и fallback
@@ -63,7 +64,7 @@ class SearchFoodByBarcodeUseCase @Inject constructor(
                             }
                             else -> {
                                 NetworkResult.Error(
-                                    message = "Продукт не найден ни в API, ни в локальном кэше",
+                                    error = DomainError.Data.NoCache,
                                     exception = (remoteResult as? NetworkResult.Error)?.exception
                                 )
                             }

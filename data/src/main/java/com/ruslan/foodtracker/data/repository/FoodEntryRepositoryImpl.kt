@@ -3,6 +3,7 @@ package com.ruslan.foodtracker.data.repository
 import com.ruslan.foodtracker.data.local.dao.FoodEntryDao
 import com.ruslan.foodtracker.data.mapper.toDomain
 import com.ruslan.foodtracker.data.mapper.toEntity
+import com.ruslan.foodtracker.domain.error.DomainError
 import com.ruslan.foodtracker.domain.model.FoodEntry
 import com.ruslan.foodtracker.domain.model.NetworkResult
 import com.ruslan.foodtracker.domain.repository.FoodEntryRepository
@@ -25,7 +26,7 @@ class FoodEntryRepositoryImpl @Inject constructor(
             .onStart { emit(NetworkResult.Loading) }
             .catch { e ->
                 emit(NetworkResult.Error(
-                    message = e.message ?: "Ошибка при загрузке записей",
+                    error = DomainError.Database.FetchFailed,
                     exception = e
                 ))
             }
@@ -42,7 +43,7 @@ class FoodEntryRepositoryImpl @Inject constructor(
             .onStart { emit(NetworkResult.Loading) }
             .catch { e ->
                 emit(NetworkResult.Error(
-                    message = e.message ?: "Ошибка при загрузке записей за дату",
+                    error = DomainError.Database.FetchFailed,
                     exception = e
                 ))
             }
@@ -52,11 +53,11 @@ class FoodEntryRepositoryImpl @Inject constructor(
         if (entry != null) {
             NetworkResult.Success(entry)
         } else {
-            NetworkResult.Error("Запись не найдена")
+            NetworkResult.Error(DomainError.Database.NotFound)
         }
     } catch (e: Exception) {
         NetworkResult.Error(
-            message = e.message ?: "Ошибка при загрузке записи",
+            error = DomainError.Database.FetchFailed,
             exception = e
         )
     }
@@ -66,7 +67,7 @@ class FoodEntryRepositoryImpl @Inject constructor(
         NetworkResult.Success(id)
     } catch (e: Exception) {
         NetworkResult.Error(
-            message = e.message ?: "Ошибка при добавлении записи",
+            error = DomainError.Database.InsertFailed,
             exception = e
         )
     }
@@ -76,7 +77,7 @@ class FoodEntryRepositoryImpl @Inject constructor(
         NetworkResult.Success(Unit)
     } catch (e: Exception) {
         NetworkResult.Error(
-            message = e.message ?: "Ошибка при обновлении записи",
+            error = DomainError.Database.UpdateFailed,
             exception = e
         )
     }
@@ -86,7 +87,7 @@ class FoodEntryRepositoryImpl @Inject constructor(
         NetworkResult.Success(Unit)
     } catch (e: Exception) {
         NetworkResult.Error(
-            message = e.message ?: "Ошибка при удалении записи",
+            error = DomainError.Database.DeleteFailed,
             exception = e
         )
     }

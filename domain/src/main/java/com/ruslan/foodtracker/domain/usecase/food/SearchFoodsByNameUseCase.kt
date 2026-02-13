@@ -1,5 +1,6 @@
 package com.ruslan.foodtracker.domain.usecase.food
 
+import com.ruslan.foodtracker.domain.error.DomainError
 import com.ruslan.foodtracker.domain.model.Food
 import com.ruslan.foodtracker.domain.model.NetworkResult
 import com.ruslan.foodtracker.domain.repository.FoodRepository
@@ -31,12 +32,12 @@ class SearchFoodsByNameUseCase @Inject constructor(
     operator fun invoke(query: String): Flow<NetworkResult<List<Food>>> {
         // Валидация запроса
         if (query.isBlank()) {
-            return flowOf(NetworkResult.Error("Поисковый запрос не может быть пустым"))
+            return flowOf(NetworkResult.Error(DomainError.Validation.EmptyQuery))
         }
 
         // Минимальная длина запроса для эффективного поиска
         if (query.length < 2) {
-            return flowOf(NetworkResult.Error("Введите минимум 2 символа для поиска"))
+            return flowOf(NetworkResult.Error(DomainError.Validation.QueryTooShort))
         }
 
         // Remote-first поиск с кэшированием и fallback
@@ -64,20 +65,20 @@ class SearchFoodsByNameUseCase @Inject constructor(
                                             localResult
                                         } else {
                                             NetworkResult.Error(
-                                                message = "Нет подключения к интернету и нет кэшированных данных",
+                                                error = DomainError.Data.NoCache,
                                                 exception = (remoteResult as? NetworkResult.Error)?.exception
                                             )
                                         }
                                     }
                                     is NetworkResult.Error -> {
                                         NetworkResult.Error(
-                                            message = "Нет подключения к интернету и нет кэшированных данных",
+                                            error = DomainError.Data.NoCache,
                                             exception = (remoteResult as? NetworkResult.Error)?.exception
                                         )
                                     }
                                     is NetworkResult.Loading -> NetworkResult.Loading
                                     is NetworkResult.Empty -> NetworkResult.Error(
-                                        message = "Нет подключения к интернету и нет кэшированных данных",
+                                        error = DomainError.Data.NoCache,
                                         exception = (remoteResult as? NetworkResult.Error)?.exception
                                     )
                                 }
