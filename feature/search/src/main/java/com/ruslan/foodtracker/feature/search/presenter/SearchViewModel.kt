@@ -97,7 +97,7 @@ class SearchViewModel @Inject constructor(
  */
 private fun Food.toProductData(): ProductData {
     return ProductData(
-        id = id.toString(),
+        id = barcode ?: id.toString(), // Используем barcode как уникальный ключ для продуктов из API
         name = name,
         brand = brand,
         portion = "${servingSize.toInt()}$servingUnit",
