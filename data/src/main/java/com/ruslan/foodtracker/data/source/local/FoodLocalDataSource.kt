@@ -23,10 +23,21 @@ class FoodLocalDataSource @Inject constructor(
     suspend fun getFoodById(id: Long): FoodEntity? = foodDao.getFoodById(id)
 
     /**
+     * Получить продукт по штрих-коду
+     */
+    suspend fun getFoodByBarcode(barcode: String): FoodEntity? = foodDao.getFoodByBarcode(barcode)
+
+    /**
      * Вставить продукт в БД
      * @return ID вставленного продукта
      */
     suspend fun insertFood(food: FoodEntity): Long = foodDao.insertFood(food)
+
+    /**
+     * Вставить несколько продуктов в БД (batch операция)
+     * @return Список ID вставленных продуктов
+     */
+    suspend fun insertFoods(foods: List<FoodEntity>): List<Long> = foodDao.insertFoods(foods)
 
     /**
      * Обновить продукт в БД
