@@ -25,19 +25,24 @@ interface OpenFoodFactsApi {
     ): Response<ProductResponse>
 
     /**
-     * Поиск продуктов по текстовому запросу
+     * Поиск продуктов по текстовому запросу (API v1)
+     *
+     * Использует v1 API endpoint (/cgi/search.pl) потому что v2 API
+     * не поддерживает полнотекстовый поиск через search_terms.
      *
      * @param searchTerms Поисковый запрос (название продукта, бренд и т.д.)
      * @param page Номер страницы результатов (по умолчанию 1)
      * @param pageSize Количество результатов на странице (по умолчанию 20)
+     * @param json Формат ответа (1 для JSON)
      * @param fields Поля для возврата (по умолчанию все основные поля)
      * @return Response<SearchResponse> со списком найденных продуктов
      */
-    @GET("api/v2/search")
+    @GET("cgi/search.pl")
     suspend fun searchProducts(
         @Query("search_terms") searchTerms: String,
         @Query("page") page: Int = 1,
         @Query("page_size") pageSize: Int = 20,
-        @Query("fields") fields: String = "code,product_name,brands,nutriments,serving_size,image_url,image_front_url,quantity"
+        @Query("json") json: Int = 1,
+        @Query("fields") fields: String = "code,product_name,brands,nutriments,serving_size,image_url"
     ): Response<SearchResponse>
 }

@@ -58,12 +58,38 @@ class FoodRepositoryImpl @Inject constructor(
         )
     }
 
+    override suspend fun getFoodByBarcodeLocal(barcode: String): NetworkResult<Food> = try {
+        val entity = localDataSource.getFoodByBarcode(barcode)
+        if (entity != null) {
+            NetworkResult.Success(entity.toDomain())
+        } else {
+            NetworkResult.Error("Продукт с таким штрих-кодом не найден в локальной БД")
+        }
+    } catch (e: Exception) {
+        NetworkResult.Error(
+            message = e.message ?: "Ошибка при поиске продукта по штрих-коду",
+            exception = e
+        )
+    }
+
     override suspend fun insertFood(food: Food): NetworkResult<Long> = try {
         val id = localDataSource.insertFood(food.toEntity())
         NetworkResult.Success(id)
     } catch (e: Exception) {
         NetworkResult.Error(
             message = e.message ?: "Ошибка при добавлении продукта",
+            exception = e
+        )
+    }
+
+    override suspend fun insertFoods(foods: List<Food>): NetworkResult<List<Long>> = try {
+        // Фильтруем дубликаты по barcode внутри списка для предотвращения конфликтов
+        val uniqueFoods = foods.distinctBy { it.barcode }
+        val ids = localDataSource.insertFoods(uniqueFoods.map { it.toEntity() })
+        NetworkResult.Success(ids)
+    } catch (e: Exception) {
+        NetworkResult.Error(
+            message = e.message ?: "Ошибка при массовом добавлении продуктов",
             exception = e
         )
     }
@@ -122,14 +148,26 @@ class FoodRepositoryImpl @Inject constructor(
      */
     override fun getFoodByBarcode(barcode: String): Flow<NetworkResult<Food>> =
         remoteDataSource.getProductByBarcode(barcode)
-            .mapNetworkResult { response ->
-                // Проверяем успешность ответа API
-                if (response.status != 1 || response.product == null) {
-                    throw IllegalStateException("Продукт не найден")
+            .map { result ->
+                when (result) {
+                    is NetworkResult.Success -> {
+                        val response = result.data
+                        // Проверяем успешность ответа API
+                        if (response.status != 1 || response.product == null) {
+                            NetworkResult.Error("Продукт с таким штрих-кодом не найден в базе Open Food Facts")
+                        } else {
+                            // Маппинг DTO -> Domain
+                            val food = response.product.toDomain()
+                            if (food != null) {
+                                NetworkResult.Success(food)
+                            } else {
+                                NetworkResult.Error("Не удалось обработать данные продукта")
+                            }
+                        }
+                    }
+                    is NetworkResult.Error -> result
+                    is NetworkResult.Loading -> result
+                    is NetworkResult.Empty -> result
                 }
-
-                // Маппинг DTO -> Domain
-                response.product.toDomain()
-                    ?: throw IllegalStateException("Не удалось обработать данные продукта")
             }
 }

@@ -12,8 +12,14 @@ interface FoodDao {
     @Query("SELECT * FROM foods WHERE id = :id")
     suspend fun getFoodById(id: Long): FoodEntity?
 
+    @Query("SELECT * FROM foods WHERE barcode = :barcode")
+    suspend fun getFoodByBarcode(barcode: String): FoodEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertFood(food: FoodEntity): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertFoods(foods: List<FoodEntity>): List<Long>
 
     @Update
     suspend fun updateFood(food: FoodEntity)
@@ -21,6 +27,12 @@ interface FoodDao {
     @Delete
     suspend fun deleteFood(food: FoodEntity)
 
-    @Query("SELECT * FROM foods WHERE name LIKE '%' || :query || '%' ORDER BY name ASC")
+    @Query("""
+        SELECT * FROM foods
+        WHERE name LIKE '%' || :query || '%'
+           OR brand LIKE '%' || :query || '%'
+           OR barcode LIKE '%' || :query || '%'
+        ORDER BY name ASC
+    """)
     fun searchFoods(query: String): Flow<List<FoodEntity>>
 }

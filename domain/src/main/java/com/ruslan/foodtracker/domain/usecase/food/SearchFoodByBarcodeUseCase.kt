@@ -2,11 +2,8 @@ package com.ruslan.foodtracker.domain.usecase.food
 
 import com.ruslan.foodtracker.domain.model.Food
 import com.ruslan.foodtracker.domain.model.NetworkResult
-import com.ruslan.foodtracker.domain.model.andThen
 import com.ruslan.foodtracker.domain.repository.FoodRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -47,45 +44,32 @@ class SearchFoodByBarcodeUseCase @Inject constructor(
 
         // Remote-first поиск с кэшированием и fallback
         return repository.getFoodByBarcode(cleanBarcode)
-            .andThen { food ->
-                // Бизнес-логика кэширования (сохраняем найденный продукт)
-                // Игнорируем ошибки (дубликаты и т.д.)
-                repository.insertFood(food)
-
-                // Возвращаем найденный продукт
-                flowOf(NetworkResult.Success(food))
-            }
-            .catch { exception ->
-                // Бизнес-логика fallback: при ошибке сети ищем в локальной БД по barcode
-                emitAll(
-                    repository.getAllFoods()
-                        .map { result ->
-                            when (result) {
-                                is NetworkResult.Success -> {
-                                    val foundFood = result.data.find { it.barcode == cleanBarcode }
-                                    if (foundFood != null) {
-                                        NetworkResult.Success(foundFood)
-                                    } else {
-                                        NetworkResult.Error(
-                                            message = "Продукт не найден ни в API, ни в локальном кэше",
-                                            exception = exception
-                                        )
-                                    }
-                                }
-                                is NetworkResult.Error -> {
-                                    NetworkResult.Error(
-                                        message = "Продукт не найден ни в API, ни в локальном кэше",
-                                        exception = exception
-                                    )
-                                }
-                                is NetworkResult.Loading -> NetworkResult.Loading
-                                is NetworkResult.Empty -> NetworkResult.Error(
+            .map { remoteResult ->
+                when (remoteResult) {
+                    is NetworkResult.Success -> {
+                        // Успех - кэшируем найденный продукт
+                        repository.insertFood(remoteResult.data)
+                        remoteResult
+                    }
+                    is NetworkResult.Loading -> {
+                        NetworkResult.Loading
+                    }
+                    is NetworkResult.Error, is NetworkResult.Empty -> {
+                        // Бизнес-логика fallback: при ошибке API ищем в локальной БД
+                        val localResult = repository.getFoodByBarcodeLocal(cleanBarcode)
+                        when (localResult) {
+                            is NetworkResult.Success -> {
+                                localResult
+                            }
+                            else -> {
+                                NetworkResult.Error(
                                     message = "Продукт не найден ни в API, ни в локальном кэше",
-                                    exception = exception
+                                    exception = (remoteResult as? NetworkResult.Error)?.exception
                                 )
                             }
                         }
-                )
+                    }
+                }
             }
     }
 }
