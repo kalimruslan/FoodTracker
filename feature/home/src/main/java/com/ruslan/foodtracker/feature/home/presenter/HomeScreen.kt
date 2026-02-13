@@ -27,6 +27,7 @@ import com.ruslan.foodtracker.core.ui.components.*
 import com.ruslan.foodtracker.core.ui.theme.*
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import androidx.compose.ui.text.style.TextAlign
 
 /**
  * Главный экран (Дневник питания)
@@ -61,30 +62,72 @@ private fun HomeScreenContent(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .verticalScroll(rememberScrollState())
     ) {
-        // Header с gradient
+        // Header с gradient (всегда показываем)
         HomeHeader(
             uiState = uiState,
             onDaySelected = onDaySelected
         )
 
-        // Приёмы пищи
-        MealsSection(
-            meals = uiState.meals,
-            onAddClick = onNavigateToSearch,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
-        )
+        // Loading состояние
+        if (uiState.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(32.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                LoadingIndicator(text = "Загрузка...")
+            }
+            return
+        }
 
-        // Трекер воды
-        WaterTracker(
-            current = uiState.waterGlasses,
-            target = uiState.waterTarget,
-            onAddGlass = onAddWaterGlass,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 0.dp)
-        )
+        // Error состояние
+        if (uiState.error != null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(32.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Text(
+                        text = uiState.error,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.error,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+            return
+        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        // Основной контент с прокруткой
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
+            // Приёмы пищи
+            MealsSection(
+                meals = uiState.meals,
+                onAddClick = onNavigateToSearch,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
+            )
+
+            // Трекер воды
+            WaterTracker(
+                current = uiState.waterGlasses,
+                target = uiState.waterTarget,
+                onAddGlass = onAddWaterGlass,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 0.dp)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+        }
     }
 }
 

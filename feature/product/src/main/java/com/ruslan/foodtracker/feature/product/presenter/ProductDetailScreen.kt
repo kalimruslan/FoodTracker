@@ -31,6 +31,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.ruslan.foodtracker.core.ui.components.CircularProgress
 import com.ruslan.foodtracker.core.ui.components.NutrientGrid
 import com.ruslan.foodtracker.core.ui.theme.*
+import com.ruslan.foodtracker.feature.product.presenter.components.MealSelectionDialog
 
 @Composable
 fun ProductDetailScreen(
@@ -45,6 +46,11 @@ fun ProductDetailScreen(
         onNavigateBack = onNavigateBack,
         onWeightChanged = viewModel::onWeightChanged,
         onUnitSelected = viewModel::onUnitSelected,
+        onShowMealDialog = viewModel::onShowMealDialog,
+        onDismissMealDialog = viewModel::onDismissMealDialog,
+        onMealSelected = { mealType ->
+            viewModel.onMealSelected(mealType, onNavigateBack)
+        },
         modifier = modifier
     )
 }
@@ -55,9 +61,50 @@ private fun ProductDetailContent(
     onNavigateBack: () -> Unit,
     onWeightChanged: (String) -> Unit,
     onUnitSelected: (PortionUnit) -> Unit,
+    onShowMealDialog: () -> Unit,
+    onDismissMealDialog: () -> Unit,
+    onMealSelected: (com.ruslan.foodtracker.domain.model.MealType) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier.fillMaxSize()) {
+        // Loading состояние
+        if (uiState.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+            return
+        }
+
+        // Error состояние
+        if (uiState.error != null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Text(
+                        text = uiState.error,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                    Button(onClick = onNavigateBack) {
+                        Text("Назад")
+                    }
+                }
+            }
+            return
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -170,7 +217,7 @@ private fun ProductDetailContent(
 
         // Add button
         Button(
-            onClick = onNavigateBack,
+            onClick = onShowMealDialog,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
@@ -178,7 +225,15 @@ private fun ProductDetailContent(
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Primary)
         ) {
-            Text("Добавить в Завтрак", fontSize = 16.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 8.dp))
+            Text("Добавить в дневник", fontSize = 16.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 8.dp))
+        }
+
+        // Meal selection dialog
+        if (uiState.showMealDialog) {
+            MealSelectionDialog(
+                onMealSelected = onMealSelected,
+                onDismiss = onDismissMealDialog
+            )
         }
     }
 }
@@ -199,7 +254,10 @@ private fun ProductDetailPreview() {
             ),
             onNavigateBack = {},
             onWeightChanged = {},
-            onUnitSelected = {}
+            onUnitSelected = {},
+            onShowMealDialog = {},
+            onDismissMealDialog = {},
+            onMealSelected = {}
         )
     }
 }
