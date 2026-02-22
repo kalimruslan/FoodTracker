@@ -11,6 +11,7 @@ import com.ruslan.foodtracker.domain.model.doActionIfSuccess
 import com.ruslan.foodtracker.domain.usecase.entry.DeleteFoodEntryUseCase
 import com.ruslan.foodtracker.domain.usecase.entry.GetEntriesByDateUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,6 +31,8 @@ class HomeViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
+
+    private var loadJob: Job? = null
 
     init {
         loadEntriesForSelectedDate()
@@ -62,7 +65,8 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun loadEntriesForSelectedDate() {
-        viewModelScope.launch {
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
             val selectedDate = _uiState.value.selectedDate
             getEntriesByDateUseCase(selectedDate).collect { result ->
                 result.doActionIfLoading {
@@ -130,13 +134,14 @@ class HomeViewModel @Inject constructor(
         val foodItems = entries.map { entry ->
             FoodItemData(
                 name = entry.foodName,
-                weight = "${entry.servings}x",
+                weight = "${entry.amountGrams.toInt()}г",
                 calories = entry.calories
             )
         }
 
         return MealData(
             id = mealType.ordinal.toLong(),
+            mealType = mealType,
             emoji = emoji,
             name = name,
             time = time,
@@ -178,6 +183,7 @@ data class MacroData(
  */
 data class MealData(
     val id: Long,
+    val mealType: MealType,
     val emoji: String,
     val name: String,
     val time: String?,

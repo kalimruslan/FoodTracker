@@ -16,7 +16,7 @@ import com.ruslan.foodtracker.data.local.entity.FoodEntryEntity
         FoodEntity::class,
         FoodEntryEntity::class
     ],
-    version = 3,
+    version = 5,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

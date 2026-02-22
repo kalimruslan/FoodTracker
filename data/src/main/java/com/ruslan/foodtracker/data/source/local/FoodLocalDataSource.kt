@@ -53,4 +53,15 @@ class FoodLocalDataSource @Inject constructor(
      * Поиск продуктов по названию в локальной БД
      */
     fun searchFoods(query: String): Flow<List<FoodEntity>> = foodDao.searchFoods(query)
+
+    /**
+     * Обновить флаг избранного для продукта по ID
+     */
+    suspend fun updateFavoriteById(id: Long, isFavorite: Boolean): Int =
+        foodDao.updateFavoriteById(id, isFavorite)
+
+    /**
+     * Получить все продукты из избранного
+     */
+    fun getFavoriteFoods(): Flow<List<FoodEntity>> = foodDao.getFavoriteFoods()
 }

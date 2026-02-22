@@ -72,11 +72,13 @@ class ProductDetailViewModel @Inject constructor(
             val servings = currentState.multiplier
 
             // Создаем FoodEntry
+            val amountGrams = servings * food.servingSize
             val foodEntry = FoodEntry(
-                id = 0, // Будет назначен БД
+                id = 0,
                 foodId = food.id,
                 foodName = food.name,
                 servings = servings.toDouble(),
+                amountGrams = amountGrams,
                 calories = (food.calories * servings).toInt(),
                 protein = food.protein * servings,
                 carbs = food.carbs * servings,

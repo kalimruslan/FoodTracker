@@ -32,13 +32,9 @@ class FoodEntryRepositoryImpl @Inject constructor(
             }
 
     override fun getEntriesByDate(date: LocalDate): Flow<NetworkResult<List<FoodEntry>>> =
-        foodEntryDao.getAllEntries()
+        foodEntryDao.getEntriesByDate(date.toString())
             .map<List<com.ruslan.foodtracker.data.local.entity.FoodEntryEntity>, NetworkResult<List<FoodEntry>>> { entities ->
-                NetworkResult.Success(
-                    entities.filter { entry ->
-                        entry.timestamp.toLocalDate() == date
-                    }.map { it.toDomain() }
-                )
+                NetworkResult.Success(entities.map { it.toDomain() })
             }
             .onStart { emit(NetworkResult.Loading) }
             .catch { e ->

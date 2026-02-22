@@ -35,7 +35,7 @@ import androidx.compose.ui.text.style.TextAlign
  */
 @Composable
 fun HomeScreen(
-    onNavigateToSearch: () -> Unit,
+    onNavigateToSearch: (mealType: String, date: String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
@@ -53,7 +53,7 @@ fun HomeScreen(
 @Composable
 private fun HomeScreenContent(
     uiState: HomeUiState,
-    onNavigateToSearch: () -> Unit,
+    onNavigateToSearch: (mealType: String, date: String) -> Unit,
     onDaySelected: (Int) -> Unit,
     onAddWaterGlass: () -> Unit,
     modifier: Modifier = Modifier
@@ -114,7 +114,9 @@ private fun HomeScreenContent(
             // Приёмы пищи
             MealsSection(
                 meals = uiState.meals,
-                onAddClick = onNavigateToSearch,
+                onAddClick = { meal ->
+                    onNavigateToSearch(meal.mealType.name, uiState.selectedDate.toString())
+                },
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
             )
 
@@ -338,7 +340,7 @@ private fun WeekDaySelector(
 @Composable
 private fun MealsSection(
     meals: List<MealData>,
-    onAddClick: () -> Unit,
+    onAddClick: (MealData) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
@@ -353,13 +355,6 @@ private fun MealsSection(
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.ExtraBold
             )
-            Text(
-                text = "+ Добавить приём",
-                fontSize = 12.sp,
-                color = Primary,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.clickable { /* TODO */ }
-            )
         }
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -372,7 +367,7 @@ private fun MealsSection(
                 time = meal.time,
                 totalCalories = meal.totalCalories,
                 foodItems = meal.foodItems,
-                onAddClick = onAddClick
+                onAddClick = { onAddClick(meal) }
             )
             Spacer(modifier = Modifier.height(10.dp))
         }
@@ -468,6 +463,7 @@ private fun HomeScreenPreview() {
                 meals = listOf(
                     MealData(
                         id = 1,
+                        mealType = com.ruslan.foodtracker.domain.model.MealType.BREAKFAST,
                         emoji = "🌅",
                         name = "Завтрак",
                         time = "08:00",
@@ -479,6 +475,7 @@ private fun HomeScreenPreview() {
                     ),
                     MealData(
                         id = 2,
+                        mealType = com.ruslan.foodtracker.domain.model.MealType.LUNCH,
                         emoji = "☀️",
                         name = "Обед",
                         time = "13:00",
@@ -492,7 +489,7 @@ private fun HomeScreenPreview() {
                 waterGlasses = 4,
                 waterTarget = 8
             ),
-            onNavigateToSearch = {},
+            onNavigateToSearch = { _, _ -> },
             onDaySelected = {},
             onAddWaterGlass = {}
         )
@@ -516,7 +513,7 @@ private fun HomeScreenPreviewDark() {
                 waterGlasses = 6,
                 waterTarget = 8
             ),
-            onNavigateToSearch = {},
+            onNavigateToSearch = { _, _ -> },
             onDaySelected = {},
             onAddWaterGlass = {}
         )

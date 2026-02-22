@@ -9,6 +9,9 @@ interface FoodEntryDao {
     @Query("SELECT * FROM food_entries ORDER BY timestamp DESC")
     fun getAllEntries(): Flow<List<FoodEntryEntity>>
 
+    @Query("SELECT * FROM food_entries WHERE timestamp LIKE :date || '%' ORDER BY timestamp ASC")
+    fun getEntriesByDate(date: String): Flow<List<FoodEntryEntity>>
+
     @Query("SELECT * FROM food_entries WHERE id = :id")
     suspend fun getEntryById(id: Long): FoodEntryEntity?
 

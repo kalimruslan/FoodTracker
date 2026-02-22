@@ -102,7 +102,7 @@ private enum class BottomNavItem(
         label = "Главная"
     ),
     SEARCH(
-        route = NavRoutes.Search,
+        route = NavRoutes.Search(),
         icon = Icons.Filled.Search,
         label = "Поиск"
     ),
@@ -127,7 +127,8 @@ fun shouldShowBottomBar(currentRoute: NavRoutes?): Boolean {
         is NavRoutes.Search,
         is NavRoutes.Stats,
         is NavRoutes.Profile -> true
-        is NavRoutes.ProductDetail -> false // Скрываем на детальной странице продукта
+        is NavRoutes.ProductDetail,
+        is NavRoutes.AddFoodEntry -> false
         null -> true
     }
 }
@@ -158,7 +159,7 @@ private fun BottomNavBarPreviewDark() {
             Column {
                 Spacer(modifier = Modifier.weight(1f))
                 FoodTrackerBottomBar(
-                    currentRoute = NavRoutes.Search,
+                    currentRoute = NavRoutes.Search(),
                     onNavigate = {}
                 )
             }

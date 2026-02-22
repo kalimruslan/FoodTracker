@@ -44,7 +44,7 @@ import com.ruslan.foodtracker.feature.search.R
 
 @Composable
 fun SearchScreen(
-    onNavigateToProduct: (String) -> Unit,
+    onProductClick: (ProductData) -> Unit,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SearchViewModel = hiltViewModel()
@@ -53,7 +53,7 @@ fun SearchScreen(
 
     SearchScreenContent(
         uiState = uiState,
-        onNavigateToProduct = onNavigateToProduct,
+        onProductClick = onProductClick,
         onNavigateBack = onNavigateBack,
         onSearchQueryChanged = viewModel::onSearchQueryChanged,
         onTabSelected = viewModel::onTabSelected,
@@ -70,7 +70,7 @@ fun SearchScreen(
 @Composable
 private fun SearchScreenContent(
     uiState: SearchUiState,
-    onNavigateToProduct: (String) -> Unit,
+    onProductClick: (ProductData) -> Unit,
     onNavigateBack: () -> Unit,
     onSearchQueryChanged: (String) -> Unit,
     onTabSelected: (SearchTab) -> Unit,
@@ -170,7 +170,7 @@ private fun SearchScreenContent(
                 else -> {
                     ProductList(
                         uiState = uiState,
-                        onNavigateToProduct = onNavigateToProduct,
+                        onProductClick = onProductClick,
                         onToggleFavorite = onToggleFavorite,
                         onLoadNextPage = onLoadNextPage,
                         onRetryPagination = onRetryPagination,
@@ -188,7 +188,7 @@ private fun SearchScreenContent(
 @Composable
 private fun ProductList(
     uiState: SearchUiState,
-    onNavigateToProduct: (String) -> Unit,
+    onProductClick: (ProductData) -> Unit,
     onToggleFavorite: (String) -> Unit,
     onLoadNextPage: () -> Unit,
     onRetryPagination: () -> Unit,
@@ -239,7 +239,7 @@ private fun ProductList(
             ) { product ->
                 ProductCard(
                     product = product,
-                    onClick = { onNavigateToProduct(product.id) },
+                    onClick = { onProductClick(product) },
                     onFavoriteClick = { onToggleFavorite(product.id) }
                 )
             }
@@ -501,7 +501,7 @@ private fun SearchScreenPreview() {
                 ),
                 hasNextPage = true
             ),
-            onNavigateToProduct = {},
+            onProductClick = {},
             onNavigateBack = {},
             onSearchQueryChanged = {},
             onTabSelected = {},

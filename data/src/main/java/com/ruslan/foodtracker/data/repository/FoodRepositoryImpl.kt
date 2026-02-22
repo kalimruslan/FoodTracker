@@ -128,6 +128,35 @@ class FoodRepositoryImpl @Inject constructor(
                 ))
             }
 
+    // ========== FAVORITES OPERATIONS ==========
+
+    override suspend fun toggleFavorite(foodId: Long, isFavorite: Boolean): NetworkResult<Unit> = try {
+        val updatedRows = localDataSource.updateFavoriteById(foodId, isFavorite)
+        if (updatedRows == 0) {
+            NetworkResult.Error(DomainError.Database.NotFound)
+        } else {
+            NetworkResult.Success(Unit)
+        }
+    } catch (e: Exception) {
+        NetworkResult.Error(
+            error = DomainError.Database.UpdateFailed,
+            exception = e
+        )
+    }
+
+    override fun getFavoriteFoods(): Flow<NetworkResult<List<Food>>> =
+        localDataSource.getFavoriteFoods()
+            .map<List<com.ruslan.foodtracker.data.local.entity.FoodEntity>, NetworkResult<List<Food>>> { entities ->
+                NetworkResult.Success(entities.map { it.toDomain() })
+            }
+            .onStart { emit(NetworkResult.Loading) }
+            .catch { e ->
+                emit(NetworkResult.Error(
+                    error = DomainError.Database.FetchFailed,
+                    exception = e
+                ))
+            }
+
     // ========== REMOTE API OPERATIONS ==========
 
     /**

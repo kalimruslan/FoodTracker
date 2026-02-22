@@ -7,6 +7,7 @@ data class FoodEntry(
     val foodId: Long,
     val foodName: String,
     val servings: Double,
+    val amountGrams: Double,
     val calories: Int,
     val protein: Double,
     val carbs: Double,

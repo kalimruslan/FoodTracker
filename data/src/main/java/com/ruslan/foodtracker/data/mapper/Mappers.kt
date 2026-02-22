@@ -19,7 +19,8 @@ fun FoodEntity.toDomain(): Food = Food(
     servingUnit = servingUnit,
     barcode = barcode,
     brand = brand,
-    imageUrl = imageUrl
+    imageUrl = imageUrl,
+    isFavorite = isFavorite
 )
 
 fun Food.toEntity(): FoodEntity = FoodEntity(
@@ -34,7 +35,8 @@ fun Food.toEntity(): FoodEntity = FoodEntity(
     servingUnit = servingUnit,
     barcode = barcode,
     brand = brand,
-    imageUrl = imageUrl
+    imageUrl = imageUrl,
+    isFavorite = isFavorite
 )
 
 // FoodEntry mappings
@@ -43,6 +45,7 @@ fun FoodEntryEntity.toDomain(): FoodEntry = FoodEntry(
     foodId = foodId,
     foodName = foodName,
     servings = servings,
+    amountGrams = amountGrams,
     calories = calories,
     protein = protein,
     carbs = carbs,
@@ -56,6 +59,7 @@ fun FoodEntry.toEntity(): FoodEntryEntity = FoodEntryEntity(
     foodId = foodId,
     foodName = foodName,
     servings = servings,
+    amountGrams = amountGrams,
     calories = calories,
     protein = protein,
     carbs = carbs,
