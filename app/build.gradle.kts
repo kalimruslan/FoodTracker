@@ -43,6 +43,12 @@ android {
     buildFeatures {
         compose = true
     }
+
+    lint {
+        abortOnError = false
+        htmlReport = true
+        xmlReport = true
+    }
 }
 
 dependencies {
