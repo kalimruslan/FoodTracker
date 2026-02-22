@@ -27,6 +27,7 @@ import com.ruslan.foodtracker.core.ui.components.*
 import com.ruslan.foodtracker.core.ui.theme.*
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import androidx.compose.ui.text.style.TextAlign
 
 /**
  * Главный экран (Дневник питания)
@@ -34,7 +35,7 @@ import java.util.Locale
  */
 @Composable
 fun HomeScreen(
-    onNavigateToSearch: () -> Unit,
+    onNavigateToSearch: (mealType: String, date: String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
@@ -52,7 +53,7 @@ fun HomeScreen(
 @Composable
 private fun HomeScreenContent(
     uiState: HomeUiState,
-    onNavigateToSearch: () -> Unit,
+    onNavigateToSearch: (mealType: String, date: String) -> Unit,
     onDaySelected: (Int) -> Unit,
     onAddWaterGlass: () -> Unit,
     modifier: Modifier = Modifier
@@ -61,30 +62,74 @@ private fun HomeScreenContent(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .verticalScroll(rememberScrollState())
     ) {
-        // Header с gradient
+        // Header с gradient (всегда показываем)
         HomeHeader(
             uiState = uiState,
             onDaySelected = onDaySelected
         )
 
-        // Приёмы пищи
-        MealsSection(
-            meals = uiState.meals,
-            onAddClick = onNavigateToSearch,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
-        )
+        // Loading состояние
+        if (uiState.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(32.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                LoadingIndicator(text = "Загрузка...")
+            }
+            return
+        }
 
-        // Трекер воды
-        WaterTracker(
-            current = uiState.waterGlasses,
-            target = uiState.waterTarget,
-            onAddGlass = onAddWaterGlass,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 0.dp)
-        )
+        // Error состояние
+        if (uiState.error != null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(32.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Text(
+                        text = uiState.error,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.error,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+            return
+        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        // Основной контент с прокруткой
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
+            // Приёмы пищи
+            MealsSection(
+                meals = uiState.meals,
+                onAddClick = { meal ->
+                    onNavigateToSearch(meal.mealType.name, uiState.selectedDate.toString())
+                },
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
+            )
+
+            // Трекер воды
+            WaterTracker(
+                current = uiState.waterGlasses,
+                target = uiState.waterTarget,
+                onAddGlass = onAddWaterGlass,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 0.dp)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+        }
     }
 }
 
@@ -295,7 +340,7 @@ private fun WeekDaySelector(
 @Composable
 private fun MealsSection(
     meals: List<MealData>,
-    onAddClick: () -> Unit,
+    onAddClick: (MealData) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
@@ -310,13 +355,6 @@ private fun MealsSection(
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.ExtraBold
             )
-            Text(
-                text = "+ Добавить приём",
-                fontSize = 12.sp,
-                color = Primary,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.clickable { /* TODO */ }
-            )
         }
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -329,7 +367,7 @@ private fun MealsSection(
                 time = meal.time,
                 totalCalories = meal.totalCalories,
                 foodItems = meal.foodItems,
-                onAddClick = onAddClick
+                onAddClick = { onAddClick(meal) }
             )
             Spacer(modifier = Modifier.height(10.dp))
         }
@@ -425,6 +463,7 @@ private fun HomeScreenPreview() {
                 meals = listOf(
                     MealData(
                         id = 1,
+                        mealType = com.ruslan.foodtracker.domain.model.MealType.BREAKFAST,
                         emoji = "🌅",
                         name = "Завтрак",
                         time = "08:00",
@@ -436,6 +475,7 @@ private fun HomeScreenPreview() {
                     ),
                     MealData(
                         id = 2,
+                        mealType = com.ruslan.foodtracker.domain.model.MealType.LUNCH,
                         emoji = "☀️",
                         name = "Обед",
                         time = "13:00",
@@ -449,7 +489,7 @@ private fun HomeScreenPreview() {
                 waterGlasses = 4,
                 waterTarget = 8
             ),
-            onNavigateToSearch = {},
+            onNavigateToSearch = { _, _ -> },
             onDaySelected = {},
             onAddWaterGlass = {}
         )
@@ -473,7 +513,7 @@ private fun HomeScreenPreviewDark() {
                 waterGlasses = 6,
                 waterTarget = 8
             ),
-            onNavigateToSearch = {},
+            onNavigateToSearch = { _, _ -> },
             onDaySelected = {},
             onAddWaterGlass = {}
         )

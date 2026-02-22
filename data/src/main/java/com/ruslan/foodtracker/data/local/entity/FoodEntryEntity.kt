@@ -11,6 +11,7 @@ data class FoodEntryEntity(
     val foodId: Long,
     val foodName: String,
     val servings: Double,
+    val amountGrams: Double = 0.0,
     val calories: Int,
     val protein: Double,
     val carbs: Double,

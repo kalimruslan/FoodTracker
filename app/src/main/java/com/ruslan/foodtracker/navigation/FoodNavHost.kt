@@ -25,7 +25,7 @@ fun FoodNavHost(
     val currentRoute = navBackStackEntry?.destination?.route?.let { route ->
         when {
             route.contains("Home") -> NavRoutes.Home
-            route.contains("Search") -> NavRoutes.Search
+            route.contains("Search") -> NavRoutes.Search()
             route.contains("Stats") -> NavRoutes.Stats
             route.contains("Profile") -> NavRoutes.Profile
             route.contains("ProductDetail") -> null // Скрываем Bottom Bar

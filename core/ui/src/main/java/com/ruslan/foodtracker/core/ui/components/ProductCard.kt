@@ -30,7 +30,10 @@ data class ProductData(
     val protein: Float,
     val fat: Float,
     val carbs: Float,
-    val isFavorite: Boolean = false
+    val isFavorite: Boolean = false,
+    val localFoodId: Long = 0L,
+    val servingSizeGrams: Double = 100.0,
+    val servingUnit: String = "g"
 )
 
 /**

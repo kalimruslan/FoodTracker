@@ -19,13 +19,18 @@ sealed interface NavRoutes {
 
     /**
      * Поиск продуктов
+     * @param mealType MealType.name — если непустая, Search в режиме выбора (добавление в дневник)
+     * @param date LocalDate.toString() — дата записи (используется в режиме выбора)
      * - Строка поиска
      * - Табы: Поиск, Недавние, Избранное, Рецепты
      * - Список продуктов (ProductCard)
      * - Сканер штрихкода
      */
     @Serializable
-    data object Search : NavRoutes
+    data class Search(
+        val mealType: String = "",
+        val date: String = ""
+    ) : NavRoutes
 
     /**
      * Детальная информация о продукте
@@ -37,6 +42,26 @@ sealed interface NavRoutes {
      */
     @Serializable
     data class ProductDetail(val productId: String) : NavRoutes
+
+    /**
+     * Экран настройки порции перед добавлением продукта в дневник питания
+     * Все данные о продукте передаются через параметры навигации
+     */
+    @Serializable
+    data class AddFoodEntry(
+        val foodId: Long = 0L,
+        val foodName: String,
+        val brand: String = "",
+        val caloriesPerServing: Int,
+        val proteinPerServing: Double,
+        val carbsPerServing: Double,
+        val fatPerServing: Double,
+        val servingSize: Double,
+        val servingUnit: String,
+        val mealType: String,
+        val date: String,
+        val isFavorite: Boolean = false
+    ) : NavRoutes
 
     /**
      * Статистика за период

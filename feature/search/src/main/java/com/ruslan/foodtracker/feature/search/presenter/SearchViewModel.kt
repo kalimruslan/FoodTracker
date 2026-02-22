@@ -9,6 +9,7 @@ import com.ruslan.foodtracker.domain.model.doActionIfError
 import com.ruslan.foodtracker.domain.model.doActionIfLoading
 import com.ruslan.foodtracker.domain.model.doActionIfSuccess
 import com.ruslan.foodtracker.domain.usecase.food.SearchFoodsByNameUseCase
+import com.ruslan.foodtracker.domain.usecase.food.ToggleFavoriteFoodUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -20,7 +21,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    private val searchFoodsByNameUseCase: SearchFoodsByNameUseCase
+    private val searchFoodsByNameUseCase: SearchFoodsByNameUseCase,
+    private val toggleFavoriteFoodUseCase: ToggleFavoriteFoodUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SearchUiState())
@@ -58,13 +60,31 @@ class SearchViewModel @Inject constructor(
     }
 
     fun onToggleFavorite(productId: String) {
-        val products = _uiState.value.products.map { product ->
-            if (product.id == productId) {
-                product.copy(isFavorite = !product.isFavorite)
-            } else product
+        val products = _uiState.value.products
+        val product = products.find { it.id == productId } ?: return
+        val newFavorite = !product.isFavorite
+
+        // Оптимистичное обновление UI
+        _uiState.value = _uiState.value.copy(
+            products = products.map {
+                if (it.id == productId) it.copy(isFavorite = newFavorite) else it
+            }
+        )
+
+        // Сохраняем в БД только если продукт уже есть локально
+        if (product.localFoodId != 0L) {
+            viewModelScope.launch {
+                val result = toggleFavoriteFoodUseCase(product.localFoodId, newFavorite)
+                result.doActionIfError {
+                    // Откатываем при ошибке
+                    _uiState.value = _uiState.value.copy(
+                        products = _uiState.value.products.map {
+                            if (it.id == productId) it.copy(isFavorite = !newFavorite) else it
+                        }
+                    )
+                }
+            }
         }
-        _uiState.value = _uiState.value.copy(products = products)
-        // TODO: Save to repository
     }
 
     /**
@@ -197,7 +217,7 @@ class SearchViewModel @Inject constructor(
  */
 private fun Food.toProductData(): ProductData {
     return ProductData(
-        id = barcode ?: id.toString(), // Используем barcode как уникальный ключ для продуктов из API
+        id = barcode ?: id.toString(),
         name = name,
         brand = brand,
         portion = "${servingSize.toInt()}$servingUnit",
@@ -205,7 +225,10 @@ private fun Food.toProductData(): ProductData {
         protein = protein.toFloat(),
         fat = fat.toFloat(),
         carbs = carbs.toFloat(),
-        isFavorite = false // TODO: Проверить в избранном
+        isFavorite = isFavorite,
+        localFoodId = id,
+        servingSizeGrams = servingSize,
+        servingUnit = servingUnit
     )
 }
 

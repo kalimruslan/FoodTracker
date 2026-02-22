@@ -12,5 +12,6 @@ data class Food(
     val servingUnit: String,
     val barcode: String? = null,
     val brand: String? = null,
-    val imageUrl: String? = null
+    val imageUrl: String? = null,
+    val isFavorite: Boolean = false
 )
