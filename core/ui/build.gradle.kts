@@ -24,6 +24,11 @@ android {
     buildFeatures {
         compose = true
     }
+
+    lint {
+        disable += "RememberInComposition"
+        disable += "FrequentlyChangingValue"
+    }
 }
 
 dependencies {

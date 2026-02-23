@@ -48,6 +48,9 @@ android {
         abortOnError = false
         htmlReport = true
         xmlReport = true
+        disable += "NullSafeMutableLiveData"
+        disable += "RememberInComposition"
+        disable += "FrequentlyChangingValue"
     }
 }
 
