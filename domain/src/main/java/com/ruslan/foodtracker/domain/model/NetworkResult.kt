@@ -9,7 +9,9 @@ sealed class NetworkResult<out T> {
     /**
      * Успешный результат с данными
      */
-    data class Success<T>(val data: T) : NetworkResult<T>()
+    data class Success<T>(
+        val data: T
+    ) : NetworkResult<T>()
 
     /**
      * Ошибка с типизированным DomainError
@@ -21,7 +23,6 @@ sealed class NetworkResult<out T> {
         val error: DomainError,
         val exception: Throwable? = null
     ) : NetworkResult<Nothing>() {
-
         /**
          * Deprecated конструктор для обратной совместимости
          * Используйте конструктор с DomainError вместо String message
@@ -43,10 +44,10 @@ sealed class NetworkResult<out T> {
             error = when {
                 // Попытка умного маппинга старых строк в DomainError
                 message.contains("подключения", ignoreCase = true) ||
-                message.contains("connection", ignoreCase = true) -> DomainError.Network.NoConnection
+                    message.contains("connection", ignoreCase = true) -> DomainError.Network.NoConnection
 
                 message.contains("не найден", ignoreCase = true) ||
-                message.contains("not found", ignoreCase = true) -> DomainError.Data.ProductNotFound
+                    message.contains("not found", ignoreCase = true) -> DomainError.Data.ProductNotFound
 
                 code != null && code >= 500 -> DomainError.Network.ServerError
                 code != null && code >= 400 -> DomainError.Network.HttpError(code)
@@ -88,9 +89,7 @@ sealed class NetworkResult<out T> {
     data object Empty : NetworkResult<Nothing>()
 }
 
-/**
- * Extension функции для удобной работы с NetworkResult
- */
+// Extension функции для удобной работы с NetworkResult
 
 /**
  * Проверка на успешный результат
@@ -110,10 +109,11 @@ fun <T> NetworkResult<T>.isLoading(): Boolean = this is NetworkResult.Loading
 /**
  * Получение данных или null
  */
-fun <T> NetworkResult<T>.getOrNull(): T? = when (this) {
-    is NetworkResult.Success -> data
-    else -> null
-}
+fun <T> NetworkResult<T>.getOrNull(): T? =
+    when (this) {
+        is NetworkResult.Success -> data
+        else -> null
+    }
 
 /**
  * Выполнение действия при успехе
@@ -165,9 +165,10 @@ inline fun <T> NetworkResult<T>.onLoading(action: () -> Unit): NetworkResult<T> 
 /**
  * Маппинг данных при успехе
  */
-inline fun <T, R> NetworkResult<T>.map(transform: (T) -> R): NetworkResult<R> = when (this) {
-    is NetworkResult.Success -> NetworkResult.Success(transform(data))
-    is NetworkResult.Error -> NetworkResult.Error(error, exception)
-    is NetworkResult.Loading -> NetworkResult.Loading
-    is NetworkResult.Empty -> NetworkResult.Empty
-}
+inline fun <T, R> NetworkResult<T>.map(transform: (T) -> R): NetworkResult<R> =
+    when (this) {
+        is NetworkResult.Success -> NetworkResult.Success(transform(data))
+        is NetworkResult.Error -> NetworkResult.Error(error, exception)
+        is NetworkResult.Loading -> NetworkResult.Loading
+        is NetworkResult.Empty -> NetworkResult.Empty
+    }

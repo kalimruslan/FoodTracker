@@ -47,9 +47,17 @@ fun ProfileScreen(
                 .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Профиль", style = MaterialTheme.typography.titleLarge, color = Color.White, fontWeight = FontWeight.ExtraBold)
+            Text(
+                "Профиль",
+                style = MaterialTheme.typography.titleLarge,
+                color = Color.White,
+                fontWeight = FontWeight.ExtraBold
+            )
             Spacer(Modifier.height(20.dp))
-            Box(Modifier.size(80.dp).clip(CircleShape).background(Color.White.copy(0.2f)), contentAlignment = Alignment.Center) {
+            Box(
+                Modifier.size(80.dp).clip(CircleShape).background(Color.White.copy(0.2f)),
+                contentAlignment = Alignment.Center
+            ) {
                 Text("👤", fontSize = 36.sp)
             }
             Spacer(Modifier.height(12.dp))
@@ -59,7 +67,12 @@ fun ProfileScreen(
 
         Spacer(Modifier.height(16.dp))
 
-        Text("Динамика веса", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(horizontal = 16.dp))
+        Text(
+            "Динамика веса",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.ExtraBold,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
         Spacer(Modifier.height(10.dp))
 
         Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), shape = RoundedCornerShape(16.dp)) {
@@ -72,7 +85,12 @@ fun ProfileScreen(
 
         Spacer(Modifier.height(16.dp))
 
-        Text("Напоминания", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(horizontal = 16.dp))
+        Text(
+            "Напоминания",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.ExtraBold,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
         Spacer(Modifier.height(10.dp))
 
         Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), shape = RoundedCornerShape(16.dp)) {

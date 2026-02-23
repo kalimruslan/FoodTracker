@@ -33,7 +33,7 @@ subprojects {
 
     configure<io.gitlab.arturbosch.detekt.extensions.DetektExtension> {
         config.setFrom(rootProject.file("config/detekt/detekt.yml"))
-        baseline = rootProject.file("config/detekt/baseline.xml")
+        baseline = project.file("config/detekt/baseline.xml")
         buildUponDefaultConfig = true
         allRules = false
         parallel = true

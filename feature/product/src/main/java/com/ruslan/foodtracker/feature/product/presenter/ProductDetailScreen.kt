@@ -130,7 +130,12 @@ private fun ProductDetailContent(
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, null, tint = Color.White)
                     }
-                    Text("Продукт", style = MaterialTheme.typography.titleLarge, color = Color.White, fontWeight = FontWeight.ExtraBold)
+                    Text(
+                        "Продукт",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = Color.White,
+                        fontWeight = FontWeight.ExtraBold
+                    )
                     Spacer(Modifier.width(48.dp))
                 }
 
@@ -149,7 +154,11 @@ private fun ProductDetailContent(
                     color = Color.White
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(uiState.calories.toInt().toString(), style = MaterialTheme.typography.displayLarge, color = Color.White)
+                        Text(
+                            uiState.calories.toInt().toString(),
+                            style = MaterialTheme.typography.displayLarge,
+                            color = Color.White
+                        )
                         Text("ккал", fontSize = 12.sp, color = Color.White.copy(0.8f))
                     }
                 }
@@ -178,7 +187,11 @@ private fun ProductDetailContent(
                             .width(60.dp)
                             .border(2.dp, Primary.copy(0.3f), RoundedCornerShape(10.dp))
                             .padding(8.dp),
-                        textStyle = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center),
+                        textStyle = TextStyle(
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        ),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                     )
 
@@ -196,7 +209,13 @@ private fun ProductDetailContent(
                                     unit.label,
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = if (uiState.selectedUnit == unit) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = if (uiState.selectedUnit ==
+                                        unit
+                                    ) {
+                                        Color.White
+                                    } else {
+                                        MaterialTheme.colorScheme.onSurfaceVariant
+                                    }
                                 )
                             }
                         }
@@ -227,7 +246,12 @@ private fun ProductDetailContent(
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Primary)
         ) {
-            Text("Добавить в дневник", fontSize = 16.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 8.dp))
+            Text(
+                "Добавить в дневник",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
         }
 
         // Meal selection dialog

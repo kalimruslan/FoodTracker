@@ -11,7 +11,6 @@ import dagger.multibindings.IntoSet
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class ProfileNavigationModule {
-
     @Binds
     @IntoSet
     abstract fun bindProfileApi(impl: ProfileImpl): FeatureApi

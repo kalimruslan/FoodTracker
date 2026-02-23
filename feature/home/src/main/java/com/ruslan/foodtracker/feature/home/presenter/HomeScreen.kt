@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,7 +29,6 @@ import com.ruslan.foodtracker.core.ui.components.*
 import com.ruslan.foodtracker.core.ui.theme.*
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-import androidx.compose.ui.text.style.TextAlign
 
 /**
  * Главный экран (Дневник питания)
@@ -267,9 +267,7 @@ private fun HomeHeader(
  * Кнопка с иконкой в header
  */
 @Composable
-private fun HeaderIconButton(
-    icon: androidx.compose.ui.graphics.vector.ImageVector
-) {
+private fun HeaderIconButton(icon: androidx.compose.ui.graphics.vector.ImageVector) {
     Box(
         modifier = Modifier
             .size(36.dp)
@@ -309,10 +307,12 @@ private fun WeekDaySelector(
                     .width(40.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(
-                        if (selectedDayIndex == index) Color.White.copy(alpha = 0.25f)
-                        else Color.Transparent
-                    )
-                    .clickable(onClick = onDayClick)
+                        if (selectedDayIndex == index) {
+                            Color.White.copy(alpha = 0.25f)
+                        } else {
+                            Color.Transparent
+                        }
+                    ).clickable(onClick = onDayClick)
                     .padding(vertical = 6.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {

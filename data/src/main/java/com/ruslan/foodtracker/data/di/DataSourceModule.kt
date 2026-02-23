@@ -16,16 +16,11 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object DataSourceModule {
+    @Provides
+    @Singleton
+    fun provideFoodLocalDataSource(foodDao: FoodDao): FoodLocalDataSource = FoodLocalDataSource(foodDao)
 
     @Provides
     @Singleton
-    fun provideFoodLocalDataSource(
-        foodDao: FoodDao
-    ): FoodLocalDataSource = FoodLocalDataSource(foodDao)
-
-    @Provides
-    @Singleton
-    fun provideFoodRemoteDataSource(
-        api: OpenFoodFactsApi
-    ): FoodRemoteDataSource = FoodRemoteDataSource(api)
+    fun provideFoodRemoteDataSource(api: OpenFoodFactsApi): FoodRemoteDataSource = FoodRemoteDataSource(api)
 }

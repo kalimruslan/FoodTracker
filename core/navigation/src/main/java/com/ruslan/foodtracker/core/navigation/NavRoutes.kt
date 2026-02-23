@@ -41,7 +41,9 @@ sealed interface NavRoutes {
      * - Кнопка "Добавить в приём пищи"
      */
     @Serializable
-    data class ProductDetail(val productId: String) : NavRoutes
+    data class ProductDetail(
+        val productId: String
+    ) : NavRoutes
 
     /**
      * Экран настройки порции перед добавлением продукта в дневник питания

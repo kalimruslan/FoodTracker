@@ -9,33 +9,34 @@ import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 @HiltViewModel
-class StatsViewModel @Inject constructor() : ViewModel() {
+class StatsViewModel
+    @Inject
+    constructor() : ViewModel() {
+        private val _uiState = MutableStateFlow(StatsUiState())
+        val uiState: StateFlow<StatsUiState> = _uiState.asStateFlow()
 
-    private val _uiState = MutableStateFlow(StatsUiState())
-    val uiState: StateFlow<StatsUiState> = _uiState.asStateFlow()
+        init {
+            loadMockData()
+        }
 
-    init {
-        loadMockData()
+        private fun loadMockData() {
+            _uiState.value = StatsUiState(
+                weekCalories = listOf(
+                    BarData("Пн", 1850f),
+                    BarData("Вт", 2100f),
+                    BarData("Ср", 1950f),
+                    BarData("Чт", 2250f, color = com.ruslan.foodtracker.core.ui.theme.Danger),
+                    BarData("Пт", 1780f),
+                    BarData("Сб", 2050f),
+                    BarData("Вс", 1680f)
+                ),
+                avgCalories = 1951f,
+                avgProtein = 98f,
+                avgFat = 62f,
+                avgCarbs = 215f
+            )
+        }
     }
-
-    private fun loadMockData() {
-        _uiState.value = StatsUiState(
-            weekCalories = listOf(
-                BarData("Пн", 1850f),
-                BarData("Вт", 2100f),
-                BarData("Ср", 1950f),
-                BarData("Чт", 2250f, color = com.ruslan.foodtracker.core.ui.theme.Danger),
-                BarData("Пт", 1780f),
-                BarData("Сб", 2050f),
-                BarData("Вс", 1680f)
-            ),
-            avgCalories = 1951f,
-            avgProtein = 98f,
-            avgFat = 62f,
-            avgCarbs = 215f
-        )
-    }
-}
 
 data class StatsUiState(
     val weekCalories: List<BarData> = emptyList(),

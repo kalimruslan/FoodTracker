@@ -9,16 +9,17 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class ProfileImpl @Inject constructor() : ProfileApi {
+class ProfileImpl
+    @Inject
+    constructor() : ProfileApi {
+        override val baseRoute = "profile"
 
-    override val baseRoute = "profile"
-
-    override fun registerGraph(
-        navGraphBuilder: NavGraphBuilder,
-        navController: NavHostController
-    ) {
-        navGraphBuilder.composable<NavRoutes.Profile> {
-            ProfileScreen()
+        override fun registerGraph(
+            navGraphBuilder: NavGraphBuilder,
+            navController: NavHostController
+        ) {
+            navGraphBuilder.composable<NavRoutes.Profile> {
+                ProfileScreen()
+            }
         }
     }
-}

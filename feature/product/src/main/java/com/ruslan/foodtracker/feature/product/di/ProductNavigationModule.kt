@@ -11,7 +11,6 @@ import dagger.multibindings.IntoSet
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class ProductNavigationModule {
-
     @Binds
     @IntoSet
     abstract fun bindProductApi(impl: ProductImpl): FeatureApi

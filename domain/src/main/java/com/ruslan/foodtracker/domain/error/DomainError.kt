@@ -15,7 +15,6 @@ package com.ruslan.foodtracker.domain.error
  * - Presentation слой маппит ошибки в строковые ресурсы через ErrorMapper
  */
 sealed class DomainError {
-
     // ========== DATABASE ERRORS ==========
 
     /**
@@ -94,7 +93,9 @@ sealed class DomainError {
          * @param code - HTTP код ошибки (например, 404, 401)
          * Используется в: handleApi() при code 4xx
          */
-        data class HttpError(val code: Int) : Network()
+        data class HttpError(
+            val code: Int
+        ) : Network()
 
         /**
          * Сервер вернул пустой ответ (body == null)
@@ -176,23 +177,25 @@ sealed class DomainError {
     /**
      * Получить краткое описание типа ошибки (для логирования)
      */
-    fun getType(): String = when (this) {
-        is Database -> "Database"
-        is Network -> "Network"
-        is Validation -> "Validation"
-        is Data -> "Data"
-    }
+    fun getType(): String =
+        when (this) {
+            is Database -> "Database"
+            is Network -> "Network"
+            is Validation -> "Validation"
+            is Data -> "Data"
+        }
 
     /**
      * Проверка, является ли ошибка критической (требует показа пользователю)
      */
-    fun isCritical(): Boolean = when (this) {
-        is Database.FetchFailed,
-        is Database.NotFound,
-        is Network.NoConnection,
-        is Network.Timeout,
-        is Network.ServerError,
-        is Data.ProductNotFound -> true
-        else -> false
-    }
+    fun isCritical(): Boolean =
+        when (this) {
+            is Database.FetchFailed,
+            is Database.NotFound,
+            is Network.NoConnection,
+            is Network.Timeout,
+            is Network.ServerError,
+            is Data.ProductNotFound -> true
+            else -> false
+        }
 }

@@ -11,6 +11,8 @@ trim_trailing_whitespace = true
 
 [*.{kt,kts}]
 ktlint_standard_no-wildcard-imports = enabled
+# Allow wildcard imports for Compose and Room packages commonly used in this project
+ij_kotlin_packages_to_use_import_on_demand = androidx.compose.foundation.layout,androidx.compose.material3,androidx.compose.material.icons.filled,androidx.compose.runtime,androidx.room,org.junit.Assert,com.ruslan.foodtracker.core.ui.components,com.ruslan.foodtracker.core.ui.theme
 ktlint_standard_import-ordering = enabled
 ktlint_standard_max-line-length = enabled
 ktlint_standard_trailing-comma-on-call-site = disabled

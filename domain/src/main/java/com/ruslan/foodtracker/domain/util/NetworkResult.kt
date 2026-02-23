@@ -11,9 +11,14 @@ import kotlinx.coroutines.flow.map
  * который может происходить из нескольких источников
  */
 sealed interface NetworkResult<out T> {
-    class Success<out T>(val data: T) : NetworkResult<T>
+    class Success<out T>(
+        val data: T
+    ) : NetworkResult<T>
 
-    class Error<out T>(val errorCode: Int, val message: String?) : NetworkResult<T>
+    class Error<out T>(
+        val errorCode: Int,
+        val message: String?
+    ) : NetworkResult<T>
 
     class Loading<out T> : NetworkResult<T>
 }
@@ -34,7 +39,11 @@ inline fun <T, R> Flow<NetworkResult<T>>.mapNetworkResult(crossinline transform:
 /**
  * Обработка конечногно результата
  */
-fun <T> NetworkResult<T>.handleResult(onLoading: () -> Unit, onError: (String) -> Unit, onSuccess: (data: T) -> Unit) {
+fun <T> NetworkResult<T>.handleResult(
+    onLoading: () -> Unit,
+    onError: (String) -> Unit,
+    onSuccess: (data: T) -> Unit
+) {
     when (this) {
         is NetworkResult.Loading -> onLoading()
         is NetworkResult.Error -> onError(message.orEmpty())
@@ -81,10 +90,11 @@ fun <T> NetworkResult<T>.doActionIfLoading(onLoading: () -> Unit) {
 @OptIn(ExperimentalCoroutinesApi::class)
 inline fun <T, R> Flow<NetworkResult<T>>.andThen(
     crossinline nextAction: suspend (T) -> Flow<NetworkResult<R>>,
-): Flow<NetworkResult<R>> = this.flatMapLatest { result ->
-    when (result) {
-        is NetworkResult.Loading -> flowOf(NetworkResult.Loading())
-        is NetworkResult.Error -> flowOf(NetworkResult.Error(result.errorCode, result.message))
-        is NetworkResult.Success -> nextAction(result.data)
+): Flow<NetworkResult<R>> =
+    this.flatMapLatest { result ->
+        when (result) {
+            is NetworkResult.Loading -> flowOf(NetworkResult.Loading())
+            is NetworkResult.Error -> flowOf(NetworkResult.Error(result.errorCode, result.message))
+            is NetworkResult.Success -> nextAction(result.data)
+        }
     }
-}

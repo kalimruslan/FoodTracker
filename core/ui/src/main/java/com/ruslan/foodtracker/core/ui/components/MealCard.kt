@@ -58,8 +58,7 @@ fun MealCard(
                 elevation = 2.dp,
                 shape = RoundedCornerShape(16.dp),
                 ambientColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.04f)
-            )
-            .border(
+            ).border(
                 width = 1.dp,
                 color = MaterialTheme.colorScheme.outline,
                 shape = RoundedCornerShape(16.dp)
@@ -128,8 +127,7 @@ fun MealCard(
                                 elevation = 2.dp,
                                 shape = RoundedCornerShape(10.dp),
                                 ambientColor = Primary.copy(alpha = 0.4f)
-                            )
-                            .clip(RoundedCornerShape(10.dp))
+                            ).clip(RoundedCornerShape(10.dp))
                             .background(brush = addButtonBrush),
                         colors = IconButtonDefaults.filledIconButtonColors(
                             containerColor = androidx.compose.ui.graphics.Color.Transparent

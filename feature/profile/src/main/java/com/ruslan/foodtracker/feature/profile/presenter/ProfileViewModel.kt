@@ -9,32 +9,33 @@ import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 @HiltViewModel
-class ProfileViewModel @Inject constructor() : ViewModel() {
+class ProfileViewModel
+    @Inject
+    constructor() : ViewModel() {
+        private val _uiState = MutableStateFlow(ProfileUiState())
+        val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
-    private val _uiState = MutableStateFlow(ProfileUiState())
-    val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
+        init {
+            loadMockData()
+        }
 
-    init {
-        loadMockData()
-    }
-
-    private fun loadMockData() {
-        _uiState.value = ProfileUiState(
-            name = "Пользователь",
-            targetCalories = 2200,
-            weight = 130f,
-            weightHistory = listOf(
-                BarData("Янв", 135f),
-                BarData("Фев", 133.5f),
-                BarData("Мар", 132f),
-                BarData("Апр", 131.5f),
-                BarData("Май", 130.8f),
-                BarData("Июн", 130.2f),
-                BarData("Июл", 130f)
+        private fun loadMockData() {
+            _uiState.value = ProfileUiState(
+                name = "Пользователь",
+                targetCalories = 2200,
+                weight = 130f,
+                weightHistory = listOf(
+                    BarData("Янв", 135f),
+                    BarData("Фев", 133.5f),
+                    BarData("Мар", 132f),
+                    BarData("Апр", 131.5f),
+                    BarData("Май", 130.8f),
+                    BarData("Июн", 130.2f),
+                    BarData("Июл", 130f)
+                )
             )
-        )
+        }
     }
-}
 
 data class ProfileUiState(
     val name: String = "",

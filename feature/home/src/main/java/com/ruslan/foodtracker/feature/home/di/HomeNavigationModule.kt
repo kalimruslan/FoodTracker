@@ -14,7 +14,6 @@ import dagger.multibindings.IntoSet
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class HomeNavigationModule {
-
     /**
      * Добавляем HomeImpl в Set<FeatureApi> для автоматической регистрации в app модуле
      */

@@ -6,17 +6,18 @@ config:
   warningsAsErrors: false
 
 complexity:
-  ComplexMethod:
+  CyclomaticComplexMethod:
     threshold: 15
   LongMethod:
     threshold: 60
   LongParameterList:
-    threshold: 8
+    functionThreshold: 8
+    constructorThreshold: 8
     ignoreDefaultParameters: true
   TooManyFunctions:
     thresholdInFiles: 30
     thresholdInClasses: 15
-    thresholdInInterfaces: 10
+    thresholdInInterfaces: 15
     thresholdInObjects: 15
     thresholdInEnums: 8
 
@@ -42,12 +43,33 @@ style:
     ignoreEnums: true
   ReturnCount:
     max: 4
+  UnusedPrivateMember:
+    # @Preview Composable functions look unused but are used by Android Studio
+    ignoreAnnotated: ['Preview']
   WildcardImport:
     active: true
     excludeImports:
       - 'androidx.compose.foundation.layout.*'
       - 'androidx.compose.material3.*'
+      - 'androidx.compose.material.icons.filled.*'
+      - 'androidx.compose.runtime.*'
       - 'androidx.compose.ui.*'
+      - 'androidx.room.*'
+      - 'com.ruslan.foodtracker.core.ui.components.*'
+      - 'com.ruslan.foodtracker.core.ui.theme.*'
+      - 'org.junit.Assert.*'
+
+exceptions:
+  TooGenericExceptionCaught:
+    # Repositories intentionally catch broad exceptions to wrap them in NetworkResult
+    exceptionNames:
+      - ArrayIndexOutOfBoundsException
+      - Error
+      - IllegalMonitorStateException
+      - NullPointerException
+      - StackOverflowError
+      - Throwable
+    allowedExceptionNameRegex: '_|(ignore|expected).*'
 
 coroutines:
   active: true

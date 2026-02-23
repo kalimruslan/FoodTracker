@@ -11,7 +11,6 @@ import dagger.multibindings.IntoSet
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class SearchNavigationModule {
-
     @Binds
     @IntoSet
     abstract fun bindSearchApi(impl: SearchImpl): FeatureApi

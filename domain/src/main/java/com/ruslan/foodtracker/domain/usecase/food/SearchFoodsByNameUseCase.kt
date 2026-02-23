@@ -21,81 +21,88 @@ import javax.inject.Inject
  * 3. При ошибке сети - fallback на локальный кэш (без пагинации, бизнес-логика)
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class SearchFoodsByNameUseCase @Inject constructor(
-    private val repository: FoodRepository
-) {
-    /**
-     * Поиск продуктов по текстовому запросу с пагинацией
-     *
-     * @param query Поисковый запрос (название продукта, бренд и т.д.)
-     * @param page Номер страницы (начинается с 1)
-     * @return Flow<NetworkResult<PaginatedResult<Food>>> с пагинированными результатами
-     */
-    operator fun invoke(query: String, page: Int = 1): Flow<NetworkResult<PaginatedResult<Food>>> {
-        // Валидация запроса
-        if (query.isBlank()) {
-            return flowOf(NetworkResult.Error(DomainError.Validation.EmptyQuery))
-        }
+class SearchFoodsByNameUseCase
+    @Inject
+    constructor(
+        private val repository: FoodRepository
+    ) {
+        /**
+         * Поиск продуктов по текстовому запросу с пагинацией
+         *
+         * @param query Поисковый запрос (название продукта, бренд и т.д.)
+         * @param page Номер страницы (начинается с 1)
+         * @return Flow<NetworkResult<PaginatedResult<Food>>> с пагинированными результатами
+         */
+        operator fun invoke(
+            query: String,
+            page: Int = 1
+        ): Flow<NetworkResult<PaginatedResult<Food>>> {
+            // Валидация запроса
+            if (query.isBlank()) {
+                return flowOf(NetworkResult.Error(DomainError.Validation.EmptyQuery))
+            }
 
-        // Минимальная длина запроса для эффективного поиска
-        if (query.length < 2) {
-            return flowOf(NetworkResult.Error(DomainError.Validation.QueryTooShort))
-        }
+            // Минимальная длина запроса для эффективного поиска
+            if (query.length < 2) {
+                return flowOf(NetworkResult.Error(DomainError.Validation.QueryTooShort))
+            }
 
-        // Remote-first поиск с кэшированием и fallback
-        return repository.searchFoodsByNameRemote(query, page)
-            .flatMapLatest { remoteResult ->
-                when (remoteResult) {
-                    is NetworkResult.Success -> {
-                        // Успех - кэшируем продукты с barcode
-                        val foodsToCache = remoteResult.data.data.filter { it.barcode != null }
-                        if (foodsToCache.isNotEmpty()) {
-                            repository.insertFoods(foodsToCache)
+            // Remote-first поиск с кэшированием и fallback
+            return repository
+                .searchFoodsByNameRemote(query, page)
+                .flatMapLatest { remoteResult ->
+                    when (remoteResult) {
+                        is NetworkResult.Success -> {
+                            // Успех - кэшируем продукты с barcode
+                            val foodsToCache = remoteResult.data.data.filter { it.barcode != null }
+                            if (foodsToCache.isNotEmpty()) {
+                                repository.insertFoods(foodsToCache)
+                            }
+                            flowOf(remoteResult)
                         }
-                        flowOf(remoteResult)
-                    }
-                    is NetworkResult.Loading -> {
-                        flowOf(NetworkResult.Loading)
-                    }
-                    is NetworkResult.Error, is NetworkResult.Empty -> {
-                        // Бизнес-логика fallback: при ошибке API ищем в локальном кэше
-                        // Только для первой страницы (page == 1), для последующих страниц возвращаем ошибку
-                        if (page == 1) {
-                            repository.searchFoods(query)
-                                .map { localResult ->
-                                    when (localResult) {
-                                        is NetworkResult.Success -> {
-                                            if (localResult.data.isNotEmpty()) {
-                                                // Конвертируем локальный результат в PaginatedResult (одна страница)
-                                                NetworkResult.Success(
-                                                    PaginatedResult.single(localResult.data)
-                                                )
-                                            } else {
+                        is NetworkResult.Loading -> {
+                            flowOf(NetworkResult.Loading)
+                        }
+                        is NetworkResult.Error, is NetworkResult.Empty -> {
+                            // Бизнес-логика fallback: при ошибке API ищем в локальном кэше
+                            // Только для первой страницы (page == 1), для последующих страниц возвращаем ошибку
+                            if (page == 1) {
+                                repository
+                                    .searchFoods(query)
+                                    .map { localResult ->
+                                        when (localResult) {
+                                            is NetworkResult.Success -> {
+                                                if (localResult.data.isNotEmpty()) {
+                                                    // Конвертируем локальный результат в PaginatedResult (одна страница)
+                                                    NetworkResult.Success(
+                                                        PaginatedResult.single(localResult.data)
+                                                    )
+                                                } else {
+                                                    NetworkResult.Error(
+                                                        error = DomainError.Data.NoCache,
+                                                        exception = (remoteResult as? NetworkResult.Error)?.exception
+                                                    )
+                                                }
+                                            }
+                                            is NetworkResult.Error -> {
                                                 NetworkResult.Error(
                                                     error = DomainError.Data.NoCache,
                                                     exception = (remoteResult as? NetworkResult.Error)?.exception
                                                 )
                                             }
-                                        }
-                                        is NetworkResult.Error -> {
-                                            NetworkResult.Error(
+                                            is NetworkResult.Loading -> NetworkResult.Loading
+                                            is NetworkResult.Empty -> NetworkResult.Error(
                                                 error = DomainError.Data.NoCache,
                                                 exception = (remoteResult as? NetworkResult.Error)?.exception
                                             )
                                         }
-                                        is NetworkResult.Loading -> NetworkResult.Loading
-                                        is NetworkResult.Empty -> NetworkResult.Error(
-                                            error = DomainError.Data.NoCache,
-                                            exception = (remoteResult as? NetworkResult.Error)?.exception
-                                        )
                                     }
-                                }
-                        } else {
-                            // Для page > 1 не делаем fallback, просто возвращаем ошибку
-                            flowOf(remoteResult)
+                            } else {
+                                // Для page > 1 не делаем fallback, просто возвращаем ошибку
+                                flowOf(remoteResult)
+                            }
                         }
                     }
                 }
-            }
+        }
     }
-}

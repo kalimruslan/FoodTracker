@@ -72,7 +72,8 @@ fun MacroProgressBar(
             label = "progress_animation"
         )
 
-        val progressBrush = remember(color) { Brush.horizontalGradient(colors = listOf(color, color.copy(alpha = 0.8f))) }
+        val progressBrush =
+            remember(color) { Brush.horizontalGradient(colors = listOf(color, color.copy(alpha = 0.8f))) }
 
         Box(
             modifier = Modifier
@@ -219,8 +220,7 @@ private fun MacroProgressBarWhitePreview() {
                     brush = Brush.horizontalGradient(
                         colors = listOf(Primary, PrimaryDark)
                     )
-                )
-                .padding(16.dp),
+                ).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             MacroProgressBarWhite(

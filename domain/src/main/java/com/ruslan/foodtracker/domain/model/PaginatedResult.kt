@@ -42,24 +42,26 @@ data class PaginatedResult<T>(
         /**
          * Создать пустой результат пагинации
          */
-        fun <T> empty(): PaginatedResult<T> = PaginatedResult(
-            data = emptyList(),
-            currentPage = 1,
-            totalPages = 0,
-            pageSize = 0,
-            totalCount = 0
-        )
+        fun <T> empty(): PaginatedResult<T> =
+            PaginatedResult(
+                data = emptyList(),
+                currentPage = 1,
+                totalPages = 0,
+                pageSize = 0,
+                totalCount = 0
+            )
 
         /**
          * Создать результат с одной страницей (без пагинации)
          * Используется для fallback на локальный кэш
          */
-        fun <T> single(data: List<T>): PaginatedResult<T> = PaginatedResult(
-            data = data,
-            currentPage = 1,
-            totalPages = 1,
-            pageSize = data.size,
-            totalCount = data.size
-        )
+        fun <T> single(data: List<T>): PaginatedResult<T> =
+            PaginatedResult(
+                data = data,
+                currentPage = 1,
+                totalPages = 1,
+                pageSize = data.size,
+                totalCount = data.size
+            )
     }
 }
