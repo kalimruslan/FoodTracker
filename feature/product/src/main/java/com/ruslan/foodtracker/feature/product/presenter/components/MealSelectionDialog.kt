@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.ruslan.foodtracker.core.ui.theme.FoodTrackerTheme
-import com.ruslan.foodtracker.core.ui.theme.Primary
 import com.ruslan.foodtracker.domain.model.MealType
 
 /**

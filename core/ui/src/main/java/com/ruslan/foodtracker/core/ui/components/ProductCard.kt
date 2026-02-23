@@ -59,13 +59,11 @@ fun ProductCard(
                 elevation = 1.dp,
                 shape = RoundedCornerShape(14.dp),
                 ambientColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.04f)
-            )
-            .border(
+            ).border(
                 width = 1.dp,
                 color = MaterialTheme.colorScheme.outline,
                 shape = RoundedCornerShape(14.dp)
-            )
-            .clickable(onClick = onClick),
+            ).clickable(onClick = onClick),
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
@@ -147,7 +145,7 @@ fun ProductCard(
                 ) {
                     Icon(
                         imageVector = if (product.isFavorite) Icons.Filled.Star else Icons.Outlined.StarOutline,
-                        contentDescription = if (product.isFavorite) "Удалить из избранного" else "Добавить в избранное",
+                        contentDescription = if (product.isFavorite) "Удалить из избранного" else "Добавить",
                         tint = if (product.isFavorite) Accent else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(18.dp)
                     )

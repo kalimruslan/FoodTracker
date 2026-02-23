@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues></ManuallySuppressedIssues>
+  <CurrentIssues>
+    <ID>LongMethod:ProfileScreen.kt$@Composable fun ProfileScreen( modifier: Modifier = Modifier, viewModel: ProfileViewModel = hiltViewModel() )</ID>
+    <ID>MagicNumber:ProfileScreen.kt$0.2f</ID>
+    <ID>MagicNumber:ProfileScreen.kt$0.8f</ID>
+    <ID>MagicNumber:ProfileViewModel.kt$ProfileViewModel$130.2f</ID>
+    <ID>MagicNumber:ProfileViewModel.kt$ProfileViewModel$130.8f</ID>
+    <ID>MagicNumber:ProfileViewModel.kt$ProfileViewModel$130f</ID>
+    <ID>MagicNumber:ProfileViewModel.kt$ProfileViewModel$131.5f</ID>
+    <ID>MagicNumber:ProfileViewModel.kt$ProfileViewModel$132f</ID>
+    <ID>MagicNumber:ProfileViewModel.kt$ProfileViewModel$133.5f</ID>
+    <ID>MagicNumber:ProfileViewModel.kt$ProfileViewModel$135f</ID>
+  </CurrentIssues>
+</SmellBaseline>

@@ -24,132 +24,133 @@ import javax.inject.Inject
  * ViewModel для главного экрана (Дневник питания)
  */
 @HiltViewModel
-class HomeViewModel @Inject constructor(
-    private val getEntriesByDateUseCase: GetEntriesByDateUseCase,
-    private val deleteFoodEntryUseCase: DeleteFoodEntryUseCase
-) : ViewModel() {
+class HomeViewModel
+    @Inject
+    constructor(
+        private val getEntriesByDateUseCase: GetEntriesByDateUseCase,
+        private val deleteFoodEntryUseCase: DeleteFoodEntryUseCase
+    ) : ViewModel() {
+        private val _uiState = MutableStateFlow(HomeUiState())
+        val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
-    private val _uiState = MutableStateFlow(HomeUiState())
-    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
+        private var loadJob: Job? = null
 
-    private var loadJob: Job? = null
-
-    init {
-        loadEntriesForSelectedDate()
-    }
-
-    fun onDateSelected(date: LocalDate) {
-        _uiState.value = _uiState.value.copy(selectedDate = date)
-        loadEntriesForSelectedDate()
-    }
-
-    fun onDaySelected(dayIndex: Int) {
-        _uiState.value = _uiState.value.copy(selectedDayIndex = dayIndex)
-        // TODO: Calculate date from dayIndex and load data
-        // Пока просто обновляем индекс
-    }
-
-    fun onAddWaterGlass() {
-        val currentWater = _uiState.value.waterGlasses
-        _uiState.value = _uiState.value.copy(waterGlasses = currentWater + 1)
-        // TODO: Save to repository
-    }
-
-    fun onDeleteEntry(entry: FoodEntry) {
-        viewModelScope.launch {
-            deleteFoodEntryUseCase(entry).doActionIfSuccess {
-                // Перезагружаем данные
-                loadEntriesForSelectedDate()
-            }
+        init {
+            loadEntriesForSelectedDate()
         }
-    }
 
-    private fun loadEntriesForSelectedDate() {
-        loadJob?.cancel()
-        loadJob = viewModelScope.launch {
-            val selectedDate = _uiState.value.selectedDate
-            getEntriesByDateUseCase(selectedDate).collect { result ->
-                result.doActionIfLoading {
-                    _uiState.value = _uiState.value.copy(isLoading = true, error = null)
-                }
+        fun onDateSelected(date: LocalDate) {
+            _uiState.value = _uiState.value.copy(selectedDate = date)
+            loadEntriesForSelectedDate()
+        }
 
-                result.doActionIfSuccess { entries ->
-                    // Группируем записи по типу приема пищи
-                    val groupedEntries = entries.groupBy { it.mealType }
+        fun onDaySelected(dayIndex: Int) {
+            _uiState.value = _uiState.value.copy(selectedDayIndex = dayIndex)
+            // TODO: Calculate date from dayIndex and load data
+            // Пока просто обновляем индекс
+        }
 
-                    // Вычисляем итоговые калории и макросы
-                    val totalCalories = entries.sumOf { it.calories }.toFloat()
-                    val totalProtein = entries.sumOf { it.protein }.toFloat()
-                    val totalFat = entries.sumOf { it.fat }.toFloat()
-                    val totalCarbs = entries.sumOf { it.carbs }.toFloat()
+        fun onAddWaterGlass() {
+            val currentWater = _uiState.value.waterGlasses
+            _uiState.value = _uiState.value.copy(waterGlasses = currentWater + 1)
+            // TODO: Save to repository
+        }
 
-                    // Целевые значения (пока дефолтные)
-                    val targetCalories = 2200f
-                    val targetProtein = 140f
-                    val targetFat = 73f
-                    val targetCarbs = 275f
-                    val targetFiber = 30f
-
-                    // Создаем данные приемов пищи
-                    val meals = listOf(
-                        createMealData(MealType.BREAKFAST, "🌅", "Завтрак", groupedEntries),
-                        createMealData(MealType.LUNCH, "☀️", "Обед", groupedEntries),
-                        createMealData(MealType.DINNER, "🌙", "Ужин", groupedEntries),
-                        createMealData(MealType.SNACK, "🍎", "Перекус", groupedEntries)
-                    )
-
-                    _uiState.value = _uiState.value.copy(
-                        consumedCalories = totalCalories,
-                        targetCalories = targetCalories,
-                        protein = MacroData(consumed = totalProtein, target = targetProtein),
-                        fat = MacroData(consumed = totalFat, target = targetFat),
-                        carbs = MacroData(consumed = totalCarbs, target = targetCarbs),
-                        fiber = MacroData(consumed = 0f, target = targetFiber), // TODO: добавить fiber в FoodEntry
-                        meals = meals,
-                        isLoading = false,
-                        error = null
-                    )
-                }
-
-                result.doActionIfError { error ->
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        error = "Ошибка загрузки данных"
-                    )
+        fun onDeleteEntry(entry: FoodEntry) {
+            viewModelScope.launch {
+                deleteFoodEntryUseCase(entry).doActionIfSuccess {
+                    // Перезагружаем данные
+                    loadEntriesForSelectedDate()
                 }
             }
         }
-    }
 
-    private fun createMealData(
-        mealType: MealType,
-        emoji: String,
-        name: String,
-        groupedEntries: Map<MealType, List<FoodEntry>>
-    ): MealData {
-        val entries = groupedEntries[mealType] ?: emptyList()
-        val totalCalories = entries.sumOf { it.calories }
-        val time = entries.firstOrNull()?.timestamp?.format(DateTimeFormatter.ofPattern("HH:mm"))
+        private fun loadEntriesForSelectedDate() {
+            loadJob?.cancel()
+            loadJob = viewModelScope.launch {
+                val selectedDate = _uiState.value.selectedDate
+                getEntriesByDateUseCase(selectedDate).collect { result ->
+                    result.doActionIfLoading {
+                        _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+                    }
 
-        val foodItems = entries.map { entry ->
-            FoodItemData(
-                name = entry.foodName,
-                weight = "${entry.amountGrams.toInt()}г",
-                calories = entry.calories
+                    result.doActionIfSuccess { entries ->
+                        // Группируем записи по типу приема пищи
+                        val groupedEntries = entries.groupBy { it.mealType }
+
+                        // Вычисляем итоговые калории и макросы
+                        val totalCalories = entries.sumOf { it.calories }.toFloat()
+                        val totalProtein = entries.sumOf { it.protein }.toFloat()
+                        val totalFat = entries.sumOf { it.fat }.toFloat()
+                        val totalCarbs = entries.sumOf { it.carbs }.toFloat()
+
+                        // Целевые значения (пока дефолтные)
+                        val targetCalories = 2200f
+                        val targetProtein = 140f
+                        val targetFat = 73f
+                        val targetCarbs = 275f
+                        val targetFiber = 30f
+
+                        // Создаем данные приемов пищи
+                        val meals = listOf(
+                            createMealData(MealType.BREAKFAST, "🌅", "Завтрак", groupedEntries),
+                            createMealData(MealType.LUNCH, "☀️", "Обед", groupedEntries),
+                            createMealData(MealType.DINNER, "🌙", "Ужин", groupedEntries),
+                            createMealData(MealType.SNACK, "🍎", "Перекус", groupedEntries)
+                        )
+
+                        _uiState.value = _uiState.value.copy(
+                            consumedCalories = totalCalories,
+                            targetCalories = targetCalories,
+                            protein = MacroData(consumed = totalProtein, target = targetProtein),
+                            fat = MacroData(consumed = totalFat, target = targetFat),
+                            carbs = MacroData(consumed = totalCarbs, target = targetCarbs),
+                            fiber = MacroData(consumed = 0f, target = targetFiber), // TODO: добавить fiber в FoodEntry
+                            meals = meals,
+                            isLoading = false,
+                            error = null
+                        )
+                    }
+
+                    result.doActionIfError { error ->
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            error = "Ошибка загрузки данных"
+                        )
+                    }
+                }
+            }
+        }
+
+        private fun createMealData(
+            mealType: MealType,
+            emoji: String,
+            name: String,
+            groupedEntries: Map<MealType, List<FoodEntry>>
+        ): MealData {
+            val entries = groupedEntries[mealType] ?: emptyList()
+            val totalCalories = entries.sumOf { it.calories }
+            val time = entries.firstOrNull()?.timestamp?.format(DateTimeFormatter.ofPattern("HH:mm"))
+
+            val foodItems = entries.map { entry ->
+                FoodItemData(
+                    name = entry.foodName,
+                    weight = "${entry.amountGrams.toInt()}г",
+                    calories = entry.calories
+                )
+            }
+
+            return MealData(
+                id = mealType.ordinal.toLong(),
+                mealType = mealType,
+                emoji = emoji,
+                name = name,
+                time = time,
+                totalCalories = totalCalories,
+                foodItems = foodItems
             )
         }
-
-        return MealData(
-            id = mealType.ordinal.toLong(),
-            mealType = mealType,
-            emoji = emoji,
-            name = name,
-            time = time,
-            totalCalories = totalCalories,
-            foodItems = foodItems
-        )
     }
-}
 
 /**
  * UI состояние для главного экрана

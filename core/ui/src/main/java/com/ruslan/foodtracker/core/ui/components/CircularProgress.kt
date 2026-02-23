@@ -62,7 +62,8 @@ fun CircularProgress(
             drawCircle(
                 color = backgroundColor,
                 radius = radius,
-                center = androidx.compose.ui.geometry.Offset(center, center),
+                center = androidx.compose.ui.geometry
+                    .Offset(center, center),
                 style = Stroke(width = strokeWidthPx, cap = StrokeCap.Round)
             )
 

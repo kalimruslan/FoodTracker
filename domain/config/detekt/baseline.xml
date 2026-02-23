@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues></ManuallySuppressedIssues>
+  <CurrentIssues>
+    <ID>InvalidPackageDeclaration:NetworkResult.kt$package ru.synergy.dosaaf.domain</ID>
+    <ID>MagicNumber:SearchFoodByBarcodeUseCase.kt$SearchFoodByBarcodeUseCase$13</ID>
+    <ID>MagicNumber:SearchFoodByBarcodeUseCase.kt$SearchFoodByBarcodeUseCase$8</ID>
+    <ID>MaxLineLength:SearchFoodsByNameUseCase.kt$SearchFoodsByNameUseCase$// Конвертируем локальный результат в PaginatedResult (одна страница)</ID>
+  </CurrentIssues>
+</SmellBaseline>

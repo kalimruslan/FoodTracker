@@ -18,7 +18,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
-
     private const val BASE_URL = "https://world.openfoodfacts.net/"
     private const val TIMEOUT_SECONDS = 30L
 
@@ -27,51 +26,42 @@ object NetworkModule {
      */
     @Provides
     @Singleton
-    fun provideHttpLoggingInterceptor(): HttpLoggingInterceptor {
-        return HttpLoggingInterceptor().apply {
+    fun provideHttpLoggingInterceptor(): HttpLoggingInterceptor =
+        HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
-    }
 
     /**
      * Предоставляет OkHttpClient с настройками таймаутов и логирования
      */
     @Provides
     @Singleton
-    fun provideOkHttpClient(
-        loggingInterceptor: HttpLoggingInterceptor
-    ): OkHttpClient {
-        return OkHttpClient.Builder()
+    fun provideOkHttpClient(loggingInterceptor: HttpLoggingInterceptor): OkHttpClient =
+        OkHttpClient
+            .Builder()
             .addInterceptor(loggingInterceptor)
             .connectTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .readTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .writeTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .build()
-    }
 
     /**
      * Предоставляет Retrofit instance
      */
     @Provides
     @Singleton
-    fun provideRetrofit(
-        okHttpClient: OkHttpClient
-    ): Retrofit {
-        return Retrofit.Builder()
+    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit =
+        Retrofit
+            .Builder()
             .baseUrl(BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-    }
 
     /**
      * Предоставляет OpenFoodFactsApi
      */
     @Provides
     @Singleton
-    fun provideOpenFoodFactsApi(
-        retrofit: Retrofit
-    ): OpenFoodFactsApi {
-        return retrofit.create(OpenFoodFactsApi::class.java)
-    }
+    fun provideOpenFoodFactsApi(retrofit: Retrofit): OpenFoodFactsApi = retrofit.create(OpenFoodFactsApi::class.java)
 }

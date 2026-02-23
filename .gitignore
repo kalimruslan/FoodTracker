@@ -14,9 +14,11 @@ local.properties
 /app/build/
 /domain/build/
 /data/build/
+/core/build/
 /core/common/build/
 /core/ui/build/
 /core/navigation/build/
+/feature/build/
 /feature/home/build/
 /feature/search/build/
 /feature/product/build/

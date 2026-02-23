@@ -27,7 +27,6 @@ val Typography = Typography(
         lineHeight = 36.sp,
         letterSpacing = 0.sp
     ),
-
     // Заголовок экрана - 18-20sp, ExtraBold (800)
     titleLarge = TextStyle(
         fontFamily = NunitoFontFamily,
@@ -36,7 +35,6 @@ val Typography = Typography(
         lineHeight = 28.sp,
         letterSpacing = 0.sp
     ),
-
     // Заголовок секции - 16-17sp, ExtraBold (800)
     titleMedium = TextStyle(
         fontFamily = NunitoFontFamily,
@@ -45,7 +43,6 @@ val Typography = Typography(
         lineHeight = 24.sp,
         letterSpacing = 0.sp
     ),
-
     // Название продукта/приёма - 14-15sp, Bold (700)
     titleSmall = TextStyle(
         fontFamily = NunitoFontFamily,
@@ -54,7 +51,6 @@ val Typography = Typography(
         lineHeight = 20.sp,
         letterSpacing = 0.sp
     ),
-
     // Обычный текст - 13-14sp, Regular (400)
     bodyLarge = TextStyle(
         fontFamily = NunitoFontFamily,
@@ -70,7 +66,6 @@ val Typography = Typography(
         lineHeight = 18.sp,
         letterSpacing = 0.25.sp
     ),
-
     // Подпись/мета - 10-12sp, SemiBold (600)
     labelLarge = TextStyle(
         fontFamily = NunitoFontFamily,

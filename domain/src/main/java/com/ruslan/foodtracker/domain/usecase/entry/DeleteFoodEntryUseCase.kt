@@ -5,9 +5,10 @@ import com.ruslan.foodtracker.domain.model.NetworkResult
 import com.ruslan.foodtracker.domain.repository.FoodEntryRepository
 import javax.inject.Inject
 
-class DeleteFoodEntryUseCase @Inject constructor(
-    private val repository: FoodEntryRepository
-) {
-    suspend operator fun invoke(entry: FoodEntry): NetworkResult<Unit> =
-        repository.deleteEntry(entry)
-}
+class DeleteFoodEntryUseCase
+    @Inject
+    constructor(
+        private val repository: FoodEntryRepository
+    ) {
+        suspend operator fun invoke(entry: FoodEntry): NetworkResult<Unit> = repository.deleteEntry(entry)
+    }

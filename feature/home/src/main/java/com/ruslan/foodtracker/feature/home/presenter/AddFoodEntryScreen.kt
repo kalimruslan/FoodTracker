@@ -104,10 +104,13 @@ private fun AddFoodEntryContent(
                 Icon(
                     imageVector = if (uiState.isFavorite) Icons.Filled.Star else Icons.Outlined.StarOutline,
                     contentDescription = if (uiState.isFavorite) "Убрать из избранного" else "Добавить в избранное",
-                    tint = if (uiState.isFavorite) Accent
-                    else MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                        alpha = if (uiState.foodId != 0L) 1f else 0.4f
-                    ),
+                    tint = if (uiState.isFavorite) {
+                        Accent
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                            alpha = if (uiState.foodId != 0L) 1f else 0.4f
+                        )
+                    },
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -191,14 +194,15 @@ private fun ProductInfoCard(uiState: AddFoodEntryUiState) {
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
+        val cardBrush = remember {
+            Brush.horizontalGradient(
+                colors = listOf(Primary.copy(alpha = 0.08f), Primary.copy(alpha = 0.02f))
+            )
+        }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(
-                    Brush.horizontalGradient(
-                        colors = listOf(Primary.copy(alpha = 0.08f), Primary.copy(alpha = 0.02f))
-                    )
-                )
+                .background(cardBrush)
                 .padding(16.dp)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -215,7 +219,8 @@ private fun ProductInfoCard(uiState: AddFoodEntryUiState) {
                     )
                 }
                 Text(
-                    text = "На 1 порцию (${uiState.servingSize.toInt()} ${uiState.servingUnit}): ${uiState.caloriesPerServing} ккал",
+                    text = "На 1 порцию (${uiState.servingSize.toInt()} " +
+                        "${uiState.servingUnit}): ${uiState.caloriesPerServing} ккал",
                     fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -362,7 +367,11 @@ private fun NutrientsResultCard(uiState: AddFoodEntryUiState) {
 }
 
 @Composable
-private fun MacroItem(label: String, value: Double, color: Color) {
+private fun MacroItem(
+    label: String,
+    value: Double,
+    color: Color
+) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = String.format(Locale.US, "%.1f", value),
@@ -414,19 +423,18 @@ private fun MealTypeSelectorCard(
                 mealTypes.forEach { (type, info) ->
                     val (emoji, label) = info
                     val isSelected = selectedMealType == type
+                    val onTypeClick = remember(type) { { onMealTypeChanged(type) } }
                     Box(
                         modifier = Modifier
                             .weight(1f)
                             .clip(RoundedCornerShape(10.dp))
                             .background(
                                 if (isSelected) Primary else MaterialTheme.colorScheme.surfaceVariant
-                            )
-                            .border(
+                            ).border(
                                 width = if (isSelected) 0.dp else 1.dp,
                                 color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
                                 shape = RoundedCornerShape(10.dp)
-                            )
-                            .clickable { onMealTypeChanged(type) }
+                            ).clickable(onClick = onTypeClick)
                             .padding(vertical = 8.dp),
                         contentAlignment = Alignment.Center
                     ) {

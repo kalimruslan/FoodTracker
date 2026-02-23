@@ -7,10 +7,8 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
-/**
- * Extension функции для удобной работы с NetworkResult
- * Паттерн взят из проекта ДОСААФ
- */
+// Extension функции для удобной работы с NetworkResult
+// Паттерн взят из проекта ДОСААФ
 
 /**
  * Обработка всех состояний результата с отдельными callback'ами (новая версия с DomainError)
@@ -118,16 +116,15 @@ fun <T> NetworkResult<T>.doActionIfLoading(onLoading: () -> Unit) {
  * @param transform - функция трансформации данных
  * @return Flow с трансформированными данными
  */
-inline fun <T, R> Flow<NetworkResult<T>>.mapNetworkResult(
-    crossinline transform: (T) -> R
-): Flow<NetworkResult<R>> = map { result ->
-    when (result) {
-        is NetworkResult.Success -> NetworkResult.Success(transform(result.data))
-        is NetworkResult.Error -> NetworkResult.Error(result.error, result.exception)
-        is NetworkResult.Loading -> NetworkResult.Loading
-        is NetworkResult.Empty -> NetworkResult.Empty
+inline fun <T, R> Flow<NetworkResult<T>>.mapNetworkResult(crossinline transform: (T) -> R): Flow<NetworkResult<R>> =
+    map { result ->
+        when (result) {
+            is NetworkResult.Success -> NetworkResult.Success(transform(result.data))
+            is NetworkResult.Error -> NetworkResult.Error(result.error, result.exception)
+            is NetworkResult.Loading -> NetworkResult.Loading
+            is NetworkResult.Empty -> NetworkResult.Empty
+        }
     }
-}
 
 /**
  * Создает цепочку последовательных операций
@@ -147,11 +144,12 @@ inline fun <T, R> Flow<NetworkResult<T>>.mapNetworkResult(
 @OptIn(ExperimentalCoroutinesApi::class)
 inline fun <T, R> Flow<NetworkResult<T>>.andThen(
     crossinline nextAction: suspend (T) -> Flow<NetworkResult<R>>
-): Flow<NetworkResult<R>> = flatMapLatest { result ->
-    when (result) {
-        is NetworkResult.Loading -> flowOf(NetworkResult.Loading)
-        is NetworkResult.Error -> flowOf(NetworkResult.Error(result.error, result.exception))
-        is NetworkResult.Empty -> flowOf(NetworkResult.Empty)
-        is NetworkResult.Success -> nextAction(result.data)
+): Flow<NetworkResult<R>> =
+    flatMapLatest { result ->
+        when (result) {
+            is NetworkResult.Loading -> flowOf(NetworkResult.Loading)
+            is NetworkResult.Error -> flowOf(NetworkResult.Error(result.error, result.exception))
+            is NetworkResult.Empty -> flowOf(NetworkResult.Empty)
+            is NetworkResult.Success -> nextAction(result.data)
+        }
     }
-}

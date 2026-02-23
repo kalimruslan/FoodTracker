@@ -13,12 +13,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -27,7 +29,6 @@ import com.ruslan.foodtracker.core.ui.components.*
 import com.ruslan.foodtracker.core.ui.theme.*
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-import androidx.compose.ui.text.style.TextAlign
 
 /**
  * Главный экран (Дневник питания)
@@ -141,14 +142,13 @@ private fun HomeHeader(
     uiState: HomeUiState,
     onDaySelected: (Int) -> Unit
 ) {
+    val headerBrush = remember { Brush.verticalGradient(colors = listOf(Primary, PrimaryDark)) }
+    val dateFormatter = remember { DateTimeFormatter.ofPattern("d MMMM", Locale("ru")) }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(Primary, PrimaryDark)
-                )
-            )
+            .background(brush = headerBrush)
             .clip(RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp))
             .padding(horizontal = 20.dp, vertical = 16.dp)
     ) {
@@ -166,9 +166,7 @@ private fun HomeHeader(
                     fontWeight = FontWeight.Normal
                 )
                 Text(
-                    text = uiState.selectedDate.format(
-                        DateTimeFormatter.ofPattern("d MMMM", Locale("ru"))
-                    ),
+                    text = uiState.selectedDate.format(dateFormatter),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = Color.White
@@ -269,9 +267,7 @@ private fun HomeHeader(
  * Кнопка с иконкой в header
  */
 @Composable
-private fun HeaderIconButton(
-    icon: androidx.compose.ui.graphics.vector.ImageVector
-) {
+private fun HeaderIconButton(icon: androidx.compose.ui.graphics.vector.ImageVector) {
     Box(
         modifier = Modifier
             .size(36.dp)
@@ -305,15 +301,18 @@ private fun WeekDaySelector(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         weekDays.forEachIndexed { index, day ->
+            val onDayClick = remember(index) { { onDaySelected(index) } }
             Column(
                 modifier = Modifier
                     .width(40.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(
-                        if (selectedDayIndex == index) Color.White.copy(alpha = 0.25f)
-                        else Color.Transparent
-                    )
-                    .clickable { onDaySelected(index) }
+                        if (selectedDayIndex == index) {
+                            Color.White.copy(alpha = 0.25f)
+                        } else {
+                            Color.Transparent
+                        }
+                    ).clickable(onClick = onDayClick)
                     .padding(vertical = 6.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -361,13 +360,14 @@ private fun MealsSection(
 
         // Карточки приёмов пищи
         meals.forEach { meal ->
+            val onMealAddClick = remember(meal) { { onAddClick(meal) } }
             MealCard(
                 emoji = meal.emoji,
                 name = meal.name,
                 time = meal.time,
                 totalCalories = meal.totalCalories,
                 foodItems = meal.foodItems,
-                onAddClick = { onAddClick(meal) }
+                onAddClick = onMealAddClick
             )
             Spacer(modifier = Modifier.height(10.dp))
         }
@@ -391,17 +391,18 @@ private fun WaterTracker(
             containerColor = MaterialTheme.colorScheme.surface
         )
     ) {
+        val waterBrush = remember {
+            Brush.horizontalGradient(
+                colors = listOf(
+                    Secondary.copy(alpha = 0.15f),
+                    Secondary.copy(alpha = 0.08f)
+                )
+            )
+        }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(
-                    brush = Brush.horizontalGradient(
-                        colors = listOf(
-                            Secondary.copy(alpha = 0.15f),
-                            Secondary.copy(alpha = 0.08f)
-                        )
-                    )
-                )
+                .background(brush = waterBrush)
                 .padding(14.dp)
         ) {
             Row(

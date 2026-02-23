@@ -20,203 +20,209 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class SearchViewModel @Inject constructor(
-    private val searchFoodsByNameUseCase: SearchFoodsByNameUseCase,
-    private val toggleFavoriteFoodUseCase: ToggleFavoriteFoodUseCase
-) : ViewModel() {
+class SearchViewModel
+    @Inject
+    constructor(
+        private val searchFoodsByNameUseCase: SearchFoodsByNameUseCase,
+        private val toggleFavoriteFoodUseCase: ToggleFavoriteFoodUseCase
+    ) : ViewModel() {
+        private val _uiState = MutableStateFlow(SearchUiState())
+        val uiState: StateFlow<SearchUiState> = _uiState.asStateFlow()
 
-    private val _uiState = MutableStateFlow(SearchUiState())
-    val uiState: StateFlow<SearchUiState> = _uiState.asStateFlow()
+        private var searchJob: Job? = null
 
-    private var searchJob: Job? = null
+        fun onSearchQueryChanged(query: String) {
+            _uiState.value = _uiState.value.copy(searchQuery = query)
 
-    fun onSearchQueryChanged(query: String) {
-        _uiState.value = _uiState.value.copy(searchQuery = query)
+            // Отменяем предыдущий поиск
+            searchJob?.cancel()
 
-        // Отменяем предыдущий поиск
-        searchJob?.cancel()
-
-        // Debounce - ждем 500ms после ввода
-        searchJob = viewModelScope.launch {
-            delay(500)
-            if (query.length >= 2) {
-                searchProducts(query, page = 1, isInitialSearch = true)
-            } else {
-                _uiState.value = _uiState.value.copy(
-                    products = emptyList(),
-                    isLoading = false,
-                    error = null,
-                    currentPage = 1,
-                    hasNextPage = false,
-                    isFromCache = false
-                )
-            }
-        }
-    }
-
-    fun onTabSelected(tab: SearchTab) {
-        _uiState.value = _uiState.value.copy(selectedTab = tab)
-        // TODO: Load data for selected tab
-    }
-
-    fun onToggleFavorite(productId: String) {
-        val products = _uiState.value.products
-        val product = products.find { it.id == productId } ?: return
-        val newFavorite = !product.isFavorite
-
-        // Оптимистичное обновление UI
-        _uiState.value = _uiState.value.copy(
-            products = products.map {
-                if (it.id == productId) it.copy(isFavorite = newFavorite) else it
-            }
-        )
-
-        // Сохраняем в БД только если продукт уже есть локально
-        if (product.localFoodId != 0L) {
-            viewModelScope.launch {
-                val result = toggleFavoriteFoodUseCase(product.localFoodId, newFavorite)
-                result.doActionIfError {
-                    // Откатываем при ошибке
+            // Debounce - ждем 500ms после ввода
+            searchJob = viewModelScope.launch {
+                delay(500)
+                if (query.length >= 2) {
+                    searchProducts(query, page = 1, isInitialSearch = true)
+                } else {
                     _uiState.value = _uiState.value.copy(
-                        products = _uiState.value.products.map {
-                            if (it.id == productId) it.copy(isFavorite = !newFavorite) else it
-                        }
+                        products = emptyList(),
+                        isLoading = false,
+                        error = null,
+                        currentPage = 1,
+                        hasNextPage = false,
+                        isFromCache = false
                     )
                 }
             }
         }
-    }
 
-    /**
-     * Загрузка следующей страницы результатов
-     */
-    fun loadNextPage() {
-        val currentState = _uiState.value
-
-        // Проверки перед загрузкой
-        if (currentState.isLoadingMore || !currentState.hasNextPage || currentState.isFromCache) {
-            return
+        fun onTabSelected(tab: SearchTab) {
+            _uiState.value = _uiState.value.copy(selectedTab = tab)
+            // TODO: Load data for selected tab
         }
 
-        val query = currentState.searchQuery
-        if (query.length < 2) {
-            return
-        }
+        fun onToggleFavorite(productId: String) {
+            val products = _uiState.value.products
+            val product = products.find { it.id == productId } ?: return
+            val newFavorite = !product.isFavorite
 
-        searchProducts(query, page = currentState.currentPage + 1, isInitialSearch = false)
-    }
-
-    /**
-     * Повторить поиск при ошибке
-     */
-    fun onRetrySearch() {
-        val query = _uiState.value.searchQuery
-        if (query.length >= 2) {
-            searchProducts(query, page = 1, isInitialSearch = true)
-        }
-    }
-
-    /**
-     * Закрыть диалог с ошибкой
-     */
-    fun onDismissError() {
-        _uiState.value = _uiState.value.copy(error = null)
-    }
-
-    /**
-     * Повторить загрузку следующей страницы при ошибке пагинации
-     */
-    fun onRetryPagination() {
-        val currentState = _uiState.value
-        val query = currentState.searchQuery
-
-        if (query.length >= 2 && currentState.paginationError != null) {
-            // Очищаем ошибку пагинации и пробуем загрузить ту же страницу снова
-            _uiState.value = _uiState.value.copy(paginationError = null)
-            searchProducts(query, page = currentState.currentPage + 1, isInitialSearch = false)
-        }
-    }
-
-    /**
-     * Закрыть ошибку пагинации
-     */
-    fun onDismissPaginationError() {
-        _uiState.value = _uiState.value.copy(paginationError = null)
-    }
-
-    private fun searchProducts(query: String, page: Int, isInitialSearch: Boolean) {
-        viewModelScope.launch {
-            searchFoodsByNameUseCase(query, page).collect { result ->
-                // Обработка состояния Loading
-                result.doActionIfLoading {
-                    if (isInitialSearch) {
-                        _uiState.value = _uiState.value.copy(
-                            isLoading = true,
-                            error = null,
-                            isFromCache = false
-                        )
-                    } else {
-                        _uiState.value = _uiState.value.copy(
-                            isLoadingMore = true,
-                            paginationError = null
-                        )
-                    }
+            // Оптимистичное обновление UI
+            _uiState.value = _uiState.value.copy(
+                products = products.map {
+                    if (it.id == productId) it.copy(isFavorite = newFavorite) else it
                 }
+            )
 
-                // Обработка успешного результата
-                result.doActionIfSuccess { paginatedResult ->
-                    val productDataList = paginatedResult.data.map { it.toProductData() }
-
-                    // Проверяем, из кэша ли результаты (одна страница и totalPages == 1)
-                    val isFromCache = paginatedResult.totalPages == 1 && paginatedResult.totalCount == paginatedResult.data.size
-
-                    if (isInitialSearch) {
-                        // Первая загрузка - заменяем список
+            // Сохраняем в БД только если продукт уже есть локально
+            if (product.localFoodId != 0L) {
+                viewModelScope.launch {
+                    val result = toggleFavoriteFoodUseCase(product.localFoodId, newFavorite)
+                    result.doActionIfError {
+                        // Откатываем при ошибке
                         _uiState.value = _uiState.value.copy(
-                            products = productDataList,
-                            isLoading = false,
-                            error = null,
-                            currentPage = paginatedResult.currentPage,
-                            hasNextPage = paginatedResult.hasNextPage,
-                            isFromCache = isFromCache
-                        )
-                    } else {
-                        // Загрузка следующей страницы - добавляем в конец списка
-                        _uiState.value = _uiState.value.copy(
-                            products = _uiState.value.products + productDataList,
-                            isLoadingMore = false,
-                            paginationError = null,
-                            currentPage = paginatedResult.currentPage,
-                            hasNextPage = paginatedResult.hasNextPage
-                        )
-                    }
-                }
-
-                // Обработка ошибки
-                result.doActionIfError { domainError ->
-                    if (isInitialSearch) {
-                        _uiState.value = _uiState.value.copy(
-                            isLoading = false,
-                            error = domainError,
-                            isFromCache = false
-                        )
-                    } else {
-                        _uiState.value = _uiState.value.copy(
-                            isLoadingMore = false,
-                            paginationError = domainError
+                            products = _uiState.value.products.map {
+                                if (it.id == productId) it.copy(isFavorite = !newFavorite) else it
+                            }
                         )
                     }
                 }
             }
         }
+
+        /**
+         * Загрузка следующей страницы результатов
+         */
+        fun loadNextPage() {
+            val currentState = _uiState.value
+
+            // Проверки перед загрузкой
+            if (currentState.isLoadingMore || !currentState.hasNextPage || currentState.isFromCache) {
+                return
+            }
+
+            val query = currentState.searchQuery
+            if (query.length < 2) {
+                return
+            }
+
+            searchProducts(query, page = currentState.currentPage + 1, isInitialSearch = false)
+        }
+
+        /**
+         * Повторить поиск при ошибке
+         */
+        fun onRetrySearch() {
+            val query = _uiState.value.searchQuery
+            if (query.length >= 2) {
+                searchProducts(query, page = 1, isInitialSearch = true)
+            }
+        }
+
+        /**
+         * Закрыть диалог с ошибкой
+         */
+        fun onDismissError() {
+            _uiState.value = _uiState.value.copy(error = null)
+        }
+
+        /**
+         * Повторить загрузку следующей страницы при ошибке пагинации
+         */
+        fun onRetryPagination() {
+            val currentState = _uiState.value
+            val query = currentState.searchQuery
+
+            if (query.length >= 2 && currentState.paginationError != null) {
+                // Очищаем ошибку пагинации и пробуем загрузить ту же страницу снова
+                _uiState.value = _uiState.value.copy(paginationError = null)
+                searchProducts(query, page = currentState.currentPage + 1, isInitialSearch = false)
+            }
+        }
+
+        /**
+         * Закрыть ошибку пагинации
+         */
+        fun onDismissPaginationError() {
+            _uiState.value = _uiState.value.copy(paginationError = null)
+        }
+
+        private fun searchProducts(
+            query: String,
+            page: Int,
+            isInitialSearch: Boolean
+        ) {
+            viewModelScope.launch {
+                searchFoodsByNameUseCase(query, page).collect { result ->
+                    // Обработка состояния Loading
+                    result.doActionIfLoading {
+                        if (isInitialSearch) {
+                            _uiState.value = _uiState.value.copy(
+                                isLoading = true,
+                                error = null,
+                                isFromCache = false
+                            )
+                        } else {
+                            _uiState.value = _uiState.value.copy(
+                                isLoadingMore = true,
+                                paginationError = null
+                            )
+                        }
+                    }
+
+                    // Обработка успешного результата
+                    result.doActionIfSuccess { paginatedResult ->
+                        val productDataList = paginatedResult.data.map { it.toProductData() }
+
+                        // Проверяем, из кэша ли результаты (одна страница и totalPages == 1)
+                        val isFromCache =
+                            paginatedResult.totalPages == 1 && paginatedResult.totalCount == paginatedResult.data.size
+
+                        if (isInitialSearch) {
+                            // Первая загрузка - заменяем список
+                            _uiState.value = _uiState.value.copy(
+                                products = productDataList,
+                                isLoading = false,
+                                error = null,
+                                currentPage = paginatedResult.currentPage,
+                                hasNextPage = paginatedResult.hasNextPage,
+                                isFromCache = isFromCache
+                            )
+                        } else {
+                            // Загрузка следующей страницы - добавляем в конец списка
+                            _uiState.value = _uiState.value.copy(
+                                products = _uiState.value.products + productDataList,
+                                isLoadingMore = false,
+                                paginationError = null,
+                                currentPage = paginatedResult.currentPage,
+                                hasNextPage = paginatedResult.hasNextPage
+                            )
+                        }
+                    }
+
+                    // Обработка ошибки
+                    result.doActionIfError { domainError ->
+                        if (isInitialSearch) {
+                            _uiState.value = _uiState.value.copy(
+                                isLoading = false,
+                                error = domainError,
+                                isFromCache = false
+                            )
+                        } else {
+                            _uiState.value = _uiState.value.copy(
+                                isLoadingMore = false,
+                                paginationError = domainError
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
-}
 
 /**
  * Маппинг Food модели в ProductData для UI
  */
-private fun Food.toProductData(): ProductData {
-    return ProductData(
+private fun Food.toProductData(): ProductData =
+    ProductData(
         id = barcode ?: id.toString(),
         name = name,
         brand = brand,
@@ -230,7 +236,6 @@ private fun Food.toProductData(): ProductData {
         servingSizeGrams = servingSize,
         servingUnit = servingUnit
     )
-}
 
 data class SearchUiState(
     val searchQuery: String = "",
@@ -243,10 +248,14 @@ data class SearchUiState(
     val hasNextPage: Boolean = false,
     val isLoadingMore: Boolean = false,
     val paginationError: DomainError? = null,
-    val isFromCache: Boolean = false // Индикатор, что результаты из локального кэша
+    // Индикатор, что результаты из локального кэша
+    val isFromCache: Boolean = false,
 )
 
-enum class SearchTab(val label: String, val icon: String) {
+enum class SearchTab(
+    val label: String,
+    val icon: String
+) {
     SEARCH("Поиск", "🔍"),
     RECENT("Недавние", "🕐"),
     FAVORITES("Избранное", "⭐"),

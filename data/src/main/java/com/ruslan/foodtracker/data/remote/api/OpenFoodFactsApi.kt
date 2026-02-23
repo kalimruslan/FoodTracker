@@ -12,7 +12,6 @@ import retrofit2.http.Query
  * Base URL: https://world.openfoodfacts.net
  */
 interface OpenFoodFactsApi {
-
     /**
      * Получить продукт по штрих-коду
      *

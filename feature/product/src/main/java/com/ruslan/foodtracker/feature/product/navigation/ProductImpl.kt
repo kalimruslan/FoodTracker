@@ -9,20 +9,21 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class ProductImpl @Inject constructor() : ProductApi {
+class ProductImpl
+    @Inject
+    constructor() : ProductApi {
+        override val baseRoute = "product"
 
-    override val baseRoute = "product"
-
-    override fun registerGraph(
-        navGraphBuilder: NavGraphBuilder,
-        navController: NavHostController
-    ) {
-        navGraphBuilder.composable<NavRoutes.ProductDetail> {
-            ProductDetailScreen(
-                onNavigateBack = {
-                    navController.navigateUp()
-                }
-            )
+        override fun registerGraph(
+            navGraphBuilder: NavGraphBuilder,
+            navController: NavHostController
+        ) {
+            navGraphBuilder.composable<NavRoutes.ProductDetail> {
+                ProductDetailScreen(
+                    onNavigateBack = {
+                        navController.navigateUp()
+                    }
+                )
+            }
         }
     }
-}

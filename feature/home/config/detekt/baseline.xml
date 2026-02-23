@@ -1,0 +1,45 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues></ManuallySuppressedIssues>
+  <CurrentIssues>
+    <ID>ForbiddenComment:HomeViewModel.kt$HomeViewModel$// TODO: Calculate date from dayIndex and load data</ID>
+    <ID>ForbiddenComment:HomeViewModel.kt$HomeViewModel$// TODO: Save to repository</ID>
+    <ID>ForbiddenComment:HomeViewModel.kt$HomeViewModel$// TODO: добавить fiber в FoodEntry</ID>
+    <ID>LambdaParameterInRestartableEffect:AddFoodEntryScreen.kt$onNavigateBack</ID>
+    <ID>LongMethod:AddFoodEntryScreen.kt$@Composable private fun AddFoodEntryContent( uiState: AddFoodEntryUiState, onAmountChanged: (String) -&gt; Unit, onMealTypeChanged: (MealType) -&gt; Unit, onInputModeChanged: (InputMode) -&gt; Unit, onFavoriteToggle: () -&gt; Unit, onSave: () -&gt; Unit, onNavigateBack: () -&gt; Unit )</ID>
+    <ID>LongMethod:AddFoodEntryScreen.kt$@Composable private fun AmountInputCard( amountText: String, selectedInputMode: InputMode, portionGrams: Double, onAmountChanged: (String) -&gt; Unit, onInputModeChanged: (InputMode) -&gt; Unit )</ID>
+    <ID>LongMethod:AddFoodEntryScreen.kt$@Composable private fun MealTypeSelectorCard( selectedMealType: MealType, onMealTypeChanged: (MealType) -&gt; Unit )</ID>
+    <ID>LongMethod:HomeScreen.kt$@Composable private fun HomeHeader( uiState: HomeUiState, onDaySelected: (Int) -&gt; Unit )</ID>
+    <ID>LongMethod:HomeScreen.kt$@Composable private fun HomeScreenContent( uiState: HomeUiState, onNavigateToSearch: (mealType: String, date: String) -&gt; Unit, onDaySelected: (Int) -&gt; Unit, onAddWaterGlass: () -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>LongMethod:HomeScreen.kt$@Composable private fun WaterTracker( current: Int, target: Int, onAddGlass: () -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>MagicNumber:AddFoodEntryViewModel.kt$AddFoodEntryViewModel$0.1</ID>
+    <ID>MagicNumber:HomeScreen.kt$140f</ID>
+    <ID>MagicNumber:HomeScreen.kt$150</ID>
+    <ID>MagicNumber:HomeScreen.kt$150f</ID>
+    <ID>MagicNumber:HomeScreen.kt$165</ID>
+    <ID>MagicNumber:HomeScreen.kt$20f</ID>
+    <ID>MagicNumber:HomeScreen.kt$22f</ID>
+    <ID>MagicNumber:HomeScreen.kt$275f</ID>
+    <ID>MagicNumber:HomeScreen.kt$30f</ID>
+    <ID>MagicNumber:HomeScreen.kt$50f</ID>
+    <ID>MagicNumber:HomeScreen.kt$56f</ID>
+    <ID>MagicNumber:HomeScreen.kt$73f</ID>
+    <ID>MagicNumber:HomeScreen.kt$88f</ID>
+    <ID>MagicNumber:HomeScreen.kt$89</ID>
+    <ID>MagicNumber:HomeScreen.kt$8f</ID>
+    <ID>MagicNumber:HomeScreen.kt$9</ID>
+    <ID>MagicNumber:HomeViewModel.kt$HomeUiState$140f</ID>
+    <ID>MagicNumber:HomeViewModel.kt$HomeUiState$275f</ID>
+    <ID>MagicNumber:HomeViewModel.kt$HomeUiState$30f</ID>
+    <ID>MagicNumber:HomeViewModel.kt$HomeUiState$73f</ID>
+    <ID>MagicNumber:HomeViewModel.kt$HomeViewModel$140f</ID>
+    <ID>MagicNumber:HomeViewModel.kt$HomeViewModel$2200f</ID>
+    <ID>MagicNumber:HomeViewModel.kt$HomeViewModel$275f</ID>
+    <ID>MagicNumber:HomeViewModel.kt$HomeViewModel$30f</ID>
+    <ID>MagicNumber:HomeViewModel.kt$HomeViewModel$73f</ID>
+    <ID>ParameterNaming:AddFoodEntryScreen.kt$onAmountChanged</ID>
+    <ID>ParameterNaming:AddFoodEntryScreen.kt$onInputModeChanged</ID>
+    <ID>ParameterNaming:AddFoodEntryScreen.kt$onMealTypeChanged</ID>
+    <ID>ParameterNaming:HomeScreen.kt$onDaySelected</ID>
+  </CurrentIssues>
+</SmellBaseline>

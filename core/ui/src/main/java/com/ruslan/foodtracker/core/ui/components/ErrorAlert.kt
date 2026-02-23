@@ -1,12 +1,12 @@
 package com.ruslan.foodtracker.core.ui.components
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Error
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -120,7 +120,7 @@ private fun ErrorAlertLongMessagePreview() {
     FoodTrackerTheme {
         ErrorAlert(
             message = "Произошла неизвестная ошибка при попытке загрузить данные с сервера. " +
-                    "Пожалуйста, попробуйте позже или обратитесь в службу поддержки.",
+                "Пожалуйста, попробуйте позже или обратитесь в службу поддержки.",
             title = "Критическая ошибка",
             onRetry = {},
             onDismiss = {}

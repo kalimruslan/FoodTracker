@@ -5,9 +5,10 @@ import com.ruslan.foodtracker.domain.model.NetworkResult
 import com.ruslan.foodtracker.domain.repository.FoodRepository
 import javax.inject.Inject
 
-class GetFoodByIdUseCase @Inject constructor(
-    private val repository: FoodRepository
-) {
-    suspend operator fun invoke(id: Long): NetworkResult<Food> =
-        repository.getFoodById(id)
-}
+class GetFoodByIdUseCase
+    @Inject
+    constructor(
+        private val repository: FoodRepository
+    ) {
+        suspend operator fun invoke(id: Long): NetworkResult<Food> = repository.getFoodById(id)
+    }

@@ -9,16 +9,17 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class StatsImpl @Inject constructor() : StatsApi {
+class StatsImpl
+    @Inject
+    constructor() : StatsApi {
+        override val baseRoute = "stats"
 
-    override val baseRoute = "stats"
-
-    override fun registerGraph(
-        navGraphBuilder: NavGraphBuilder,
-        navController: NavHostController
-    ) {
-        navGraphBuilder.composable<NavRoutes.Stats> {
-            StatsScreen()
+        override fun registerGraph(
+            navGraphBuilder: NavGraphBuilder,
+            navController: NavHostController
+        ) {
+            navGraphBuilder.composable<NavRoutes.Stats> {
+                StatsScreen()
+            }
         }
     }
-}
