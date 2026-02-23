@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!-- Project doesn't use LiveData; Kotlin null safety covers this -->
+    <issue id="NullSafeMutableLiveData" severity="ignore"/>
+</lint>

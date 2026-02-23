@@ -46,9 +46,6 @@ android {
 
     lint {
         abortOnError = false
-        htmlReport = true
-        xmlReport = true
-        disable += "NullSafeMutableLiveData"
     }
 }
 
