@@ -53,6 +53,7 @@ jobs:
   # ── Job 2: ktlint ─────────────────────────────────────────────────────────
   ktlint:
     name: ktlint
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
@@ -91,6 +92,7 @@ jobs:
   # ── Job 3: detekt ─────────────────────────────────────────────────────────
   detekt:
     name: detekt
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
@@ -129,6 +131,7 @@ jobs:
   # ── Job 4: Android Lint (XML / Manifest / resources) ─────────────────────
   lint:
     name: Android Lint
+    needs: build
     runs-on: ubuntu-latest
 
     steps:

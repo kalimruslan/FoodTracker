@@ -1,6 +1,7 @@
 package com.ruslan.foodtracker.data.repository
 
 import com.ruslan.foodtracker.data.local.dao.FoodEntryDao
+import com.ruslan.foodtracker.data.local.entity.FoodEntryEntity
 import com.ruslan.foodtracker.data.mapper.toDomain
 import com.ruslan.foodtracker.data.mapper.toEntity
 import com.ruslan.foodtracker.domain.error.DomainError
@@ -22,7 +23,7 @@ class FoodEntryRepositoryImpl
         override fun getAllEntries(): Flow<NetworkResult<List<FoodEntry>>> =
             foodEntryDao
                 .getAllEntries()
-                .map { entities: List<com.ruslan.foodtracker.data.local.entity.FoodEntryEntity> ->
+                .map<List<FoodEntryEntity>, NetworkResult<List<FoodEntry>>> { entities ->
                     NetworkResult.Success(entities.map { it.toDomain() })
                 }.onStart { emit(NetworkResult.Loading) }
                 .catch { e ->
@@ -37,7 +38,7 @@ class FoodEntryRepositoryImpl
         override fun getEntriesByDate(date: LocalDate): Flow<NetworkResult<List<FoodEntry>>> =
             foodEntryDao
                 .getEntriesByDate(date.toString())
-                .map { entities: List<com.ruslan.foodtracker.data.local.entity.FoodEntryEntity> ->
+                .map<List<FoodEntryEntity>, NetworkResult<List<FoodEntry>>> { entities ->
                     NetworkResult.Success(entities.map { it.toDomain() })
                 }.onStart { emit(NetworkResult.Loading) }
                 .catch { e ->

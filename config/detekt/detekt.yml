@@ -62,13 +62,14 @@ style:
 exceptions:
   TooGenericExceptionCaught:
     # Repositories intentionally catch broad exceptions to wrap them in NetworkResult
+    # Exception and Throwable intentionally omitted — repositories catch them broadly
+    # to wrap all errors in NetworkResult per project convention (see CLAUDE.md)
     exceptionNames:
       - ArrayIndexOutOfBoundsException
       - Error
       - IllegalMonitorStateException
       - NullPointerException
       - StackOverflowError
-      - Throwable
     allowedExceptionNameRegex: '_|(ignore|expected).*'
 
 coroutines:

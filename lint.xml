@@ -2,4 +2,12 @@
 <lint>
     <!-- Project doesn't use LiveData; Kotlin null safety covers this -->
     <issue id="NullSafeMutableLiveData" severity="ignore"/>
+    <!--
+        These three Compose/Lifecycle lint detectors crash with IncompatibleClassChangeError
+        due to Kotlin Analysis API incompatibility with Kotlin 2.1.0 + AGP 8.7.3.
+        They were disabled individually in module build.gradle.kts files before;
+        now consolidated here via global lint.xml.
+    -->
+    <issue id="RememberInComposition" severity="ignore"/>
+    <issue id="FrequentlyChangingValue" severity="ignore"/>
 </lint>

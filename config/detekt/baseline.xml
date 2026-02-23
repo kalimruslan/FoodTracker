@@ -1,14 +1,5 @@
-<?xml version="1.0" ?>
+<?xml version="1.0" encoding="utf-8"?>
 <SmellBaseline>
-  <ManuallySuppressedIssues></ManuallySuppressedIssues>
-  <CurrentIssues>
-    <ID>MagicNumber:StatsScreen.kt$0.9f</ID>
-    <ID>MagicNumber:StatsViewModel.kt$StatsViewModel$1680f</ID>
-    <ID>MagicNumber:StatsViewModel.kt$StatsViewModel$1780f</ID>
-    <ID>MagicNumber:StatsViewModel.kt$StatsViewModel$1850f</ID>
-    <ID>MagicNumber:StatsViewModel.kt$StatsViewModel$1950f</ID>
-    <ID>MagicNumber:StatsViewModel.kt$StatsViewModel$2050f</ID>
-    <ID>MagicNumber:StatsViewModel.kt$StatsViewModel$2100f</ID>
-    <ID>MagicNumber:StatsViewModel.kt$StatsViewModel$2250f</ID>
-  </CurrentIssues>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues/>
 </SmellBaseline>
