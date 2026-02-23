@@ -9,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,6 +29,8 @@ fun StatsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    val headerBrush = remember { Brush.verticalGradient(listOf(Primary, PrimaryDark)) }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -37,7 +40,7 @@ fun StatsScreen(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Brush.verticalGradient(listOf(Primary, PrimaryDark)))
+                .background(headerBrush)
                 .clip(RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp))
                 .padding(20.dp)
         ) {

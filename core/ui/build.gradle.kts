@@ -25,10 +25,6 @@ android {
         compose = true
     }
 
-    lint {
-        disable += "RememberInComposition"
-        disable += "FrequentlyChangingValue"
-    }
 }
 
 dependencies {

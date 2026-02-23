@@ -191,14 +191,15 @@ private fun ProductInfoCard(uiState: AddFoodEntryUiState) {
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
+        val cardBrush = remember {
+            Brush.horizontalGradient(
+                colors = listOf(Primary.copy(alpha = 0.08f), Primary.copy(alpha = 0.02f))
+            )
+        }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(
-                    Brush.horizontalGradient(
-                        colors = listOf(Primary.copy(alpha = 0.08f), Primary.copy(alpha = 0.02f))
-                    )
-                )
+                .background(cardBrush)
                 .padding(16.dp)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -414,6 +415,7 @@ private fun MealTypeSelectorCard(
                 mealTypes.forEach { (type, info) ->
                     val (emoji, label) = info
                     val isSelected = selectedMealType == type
+                    val onTypeClick = remember(type) { { onMealTypeChanged(type) } }
                     Box(
                         modifier = Modifier
                             .weight(1f)
@@ -426,7 +428,7 @@ private fun MealTypeSelectorCard(
                                 color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
                                 shape = RoundedCornerShape(10.dp)
                             )
-                            .clickable { onMealTypeChanged(type) }
+                            .clickable(onClick = onTypeClick)
                             .padding(vertical = 8.dp),
                         contentAlignment = Alignment.Center
                     ) {

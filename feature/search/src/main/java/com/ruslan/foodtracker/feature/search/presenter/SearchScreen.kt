@@ -21,6 +21,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -426,13 +427,12 @@ private fun SearchBar(
             singleLine = true
         )
 
+        val cameraButtonBrush = remember { Brush.linearGradient(colors = listOf(Primary, PrimaryLight)) }
         Box(
             modifier = Modifier
                 .size(36.dp)
                 .clip(RoundedCornerShape(10.dp))
-                .background(
-                    brush = Brush.linearGradient(colors = listOf(Primary, PrimaryLight))
-                )
+                .background(brush = cameraButtonBrush)
                 .clickable { /* TODO: open camera */ },
             contentAlignment = Alignment.Center
         ) {

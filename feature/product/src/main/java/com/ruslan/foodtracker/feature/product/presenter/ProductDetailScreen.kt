@@ -15,6 +15,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -116,7 +117,7 @@ private fun ProductDetailContent(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Brush.verticalGradient(listOf(Primary, PrimaryDark)))
+                    .background(remember { Brush.verticalGradient(listOf(Primary, PrimaryDark)) })
                     .clip(RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp))
                     .padding(horizontal = 20.dp, vertical = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -183,11 +184,12 @@ private fun ProductDetailContent(
 
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         PortionUnit.entries.forEach { unit ->
+                            val onUnitClick = remember(unit) { { onUnitSelected(unit) } }
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(10.dp))
                                     .background(if (uiState.selectedUnit == unit) Primary else Color(0xFFF3F4F6))
-                                    .clickable { onUnitSelected(unit) }
+                                    .clickable(onClick = onUnitClick)
                                     .padding(horizontal = 12.dp, vertical = 8.dp)
                             ) {
                                 Text(

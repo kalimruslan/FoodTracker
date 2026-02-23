@@ -31,8 +31,6 @@ android {
 
     lint {
         disable += "NullSafeMutableLiveData"
-        disable += "RememberInComposition"
-        disable += "FrequentlyChangingValue"
     }
 }
 
