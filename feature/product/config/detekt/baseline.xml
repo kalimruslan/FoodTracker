@@ -1,0 +1,20 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues></ManuallySuppressedIssues>
+  <CurrentIssues>
+    <ID>ImplicitDefaultLocale:ProductDetailScreen.kt$String.format("%.1f", uiState.carbs)</ID>
+    <ID>ImplicitDefaultLocale:ProductDetailScreen.kt$String.format("%.1f", uiState.fat)</ID>
+    <ID>ImplicitDefaultLocale:ProductDetailScreen.kt$String.format("%.1f", uiState.fiber)</ID>
+    <ID>ImplicitDefaultLocale:ProductDetailScreen.kt$String.format("%.1f", uiState.protein)</ID>
+    <ID>LongMethod:MealSelectionDialog.kt$@Composable fun MealSelectionDialog( onMealSelected: (MealType) -&gt; Unit, onDismiss: () -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>LongMethod:ProductDetailScreen.kt$@Composable private fun ProductDetailContent( uiState: ProductDetailUiState, onNavigateBack: () -&gt; Unit, onWeightChanged: (String) -&gt; Unit, onUnitSelected: (PortionUnit) -&gt; Unit, onShowMealDialog: () -&gt; Unit, onDismissMealDialog: () -&gt; Unit, onMealSelected: (com.ruslan.foodtracker.domain.model.MealType) -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>MagicNumber:ProductDetailScreen.kt$0.3f</ID>
+    <ID>MagicNumber:ProductDetailScreen.kt$0.8f</ID>
+    <ID>MagicNumber:ProductDetailScreen.kt$0xFFF3F4F6</ID>
+    <ID>ParameterNaming:MealSelectionDialog.kt$onMealSelected</ID>
+    <ID>ParameterNaming:ProductDetailScreen.kt$onMealSelected</ID>
+    <ID>ParameterNaming:ProductDetailScreen.kt$onUnitSelected</ID>
+    <ID>ParameterNaming:ProductDetailScreen.kt$onWeightChanged</ID>
+    <ID>UnusedParameter:MealSelectionDialog.kt$mealType: MealType</ID>
+  </CurrentIssues>
+</SmellBaseline>

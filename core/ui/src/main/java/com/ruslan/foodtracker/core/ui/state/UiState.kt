@@ -22,14 +22,18 @@ sealed class UiState<out T> {
     /**
      * Успешная загрузка с данными
      */
-    data class Success<T>(val data: T) : UiState<T>()
+    data class Success<T>(
+        val data: T
+    ) : UiState<T>()
 
     /**
      * Ошибка при загрузке с типизированной ошибкой
      *
      * @property error - типизированная ошибка из domain слоя
      */
-    data class Error(val error: DomainError) : UiState<Nothing>() {
+    data class Error(
+        val error: DomainError
+    ) : UiState<Nothing>() {
         /**
          * Deprecated конструктор для обратной совместимости
          *
@@ -72,16 +76,15 @@ sealed class UiState<out T> {
 /**
  * Конвертация NetworkResult в UiState
  */
-fun <T> NetworkResult<T>.toUiState(): UiState<T> = when (this) {
-    is NetworkResult.Success -> UiState.Success(data)
-    is NetworkResult.Error -> UiState.Error(error)
-    is NetworkResult.Loading -> UiState.Loading
-    is NetworkResult.Empty -> UiState.Empty
-}
+fun <T> NetworkResult<T>.toUiState(): UiState<T> =
+    when (this) {
+        is NetworkResult.Success -> UiState.Success(data)
+        is NetworkResult.Error -> UiState.Error(error)
+        is NetworkResult.Loading -> UiState.Loading
+        is NetworkResult.Empty -> UiState.Empty
+    }
 
-/**
- * Extension функции для UiState
- */
+// Extension функции для UiState
 
 /**
  * Проверка на успешное состояние
@@ -101,7 +104,8 @@ fun <T> UiState<T>.isError(): Boolean = this is UiState.Error
 /**
  * Получение данных или null
  */
-fun <T> UiState<T>.getOrNull(): T? = when (this) {
-    is UiState.Success -> data
-    else -> null
-}
+fun <T> UiState<T>.getOrNull(): T? =
+    when (this) {
+        is UiState.Success -> data
+        else -> null
+    }

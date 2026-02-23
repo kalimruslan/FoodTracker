@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -57,8 +58,7 @@ fun MealCard(
                 elevation = 2.dp,
                 shape = RoundedCornerShape(16.dp),
                 ambientColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.04f)
-            )
-            .border(
+            ).border(
                 width = 1.dp,
                 color = MaterialTheme.colorScheme.outline,
                 shape = RoundedCornerShape(16.dp)
@@ -118,6 +118,7 @@ fun MealCard(
                     }
 
                     // Кнопка "+" с gradient
+                    val addButtonBrush = remember { Brush.linearGradient(colors = listOf(Primary, PrimaryLight)) }
                     FilledIconButton(
                         onClick = onAddClick,
                         modifier = Modifier
@@ -126,13 +127,8 @@ fun MealCard(
                                 elevation = 2.dp,
                                 shape = RoundedCornerShape(10.dp),
                                 ambientColor = Primary.copy(alpha = 0.4f)
-                            )
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(
-                                brush = Brush.linearGradient(
-                                    colors = listOf(Primary, PrimaryLight)
-                                )
-                            ),
+                            ).clip(RoundedCornerShape(10.dp))
+                            .background(brush = addButtonBrush),
                         colors = IconButtonDefaults.filledIconButtonColors(
                             containerColor = androidx.compose.ui.graphics.Color.Transparent
                         )

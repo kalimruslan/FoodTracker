@@ -27,17 +27,22 @@ interface FoodDao {
     @Delete
     suspend fun deleteFood(food: FoodEntity)
 
-    @Query("""
+    @Query(
+        """
         SELECT * FROM foods
         WHERE name LIKE '%' || :query || '%'
            OR brand LIKE '%' || :query || '%'
            OR barcode LIKE '%' || :query || '%'
         ORDER BY name ASC
-    """)
+    """
+    )
     fun searchFoods(query: String): Flow<List<FoodEntity>>
 
     @Query("UPDATE foods SET isFavorite = :isFavorite WHERE id = :id")
-    suspend fun updateFavoriteById(id: Long, isFavorite: Boolean): Int
+    suspend fun updateFavoriteById(
+        id: Long,
+        isFavorite: Boolean
+    ): Int
 
     @Query("SELECT * FROM foods WHERE isFavorite = 1 ORDER BY name ASC")
     fun getFavoriteFoods(): Flow<List<FoodEntity>>

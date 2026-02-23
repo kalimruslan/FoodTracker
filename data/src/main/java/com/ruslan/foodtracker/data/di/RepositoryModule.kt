@@ -13,16 +13,11 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
+    @Binds
+    @Singleton
+    abstract fun bindFoodRepository(impl: FoodRepositoryImpl): FoodRepository
 
     @Binds
     @Singleton
-    abstract fun bindFoodRepository(
-        impl: FoodRepositoryImpl
-    ): FoodRepository
-
-    @Binds
-    @Singleton
-    abstract fun bindFoodEntryRepository(
-        impl: FoodEntryRepositoryImpl
-    ): FoodEntryRepository
+    abstract fun bindFoodEntryRepository(impl: FoodEntryRepositoryImpl): FoodEntryRepository
 }

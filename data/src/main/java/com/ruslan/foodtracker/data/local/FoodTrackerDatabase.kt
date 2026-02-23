@@ -22,6 +22,7 @@ import com.ruslan.foodtracker.data.local.entity.FoodEntryEntity
 @TypeConverters(Converters::class)
 abstract class FoodTrackerDatabase : RoomDatabase() {
     abstract fun foodDao(): FoodDao
+
     abstract fun foodEntryDao(): FoodEntryDao
 }
 

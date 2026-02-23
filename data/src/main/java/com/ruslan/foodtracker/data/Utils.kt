@@ -21,10 +21,9 @@ internal inline fun <T> handleApi(crossinline execute: suspend () -> Response<T>
             result.isSuccessful -> emitSuccess(result)
             else -> emitErrorOrThrow(result)
         }
-    }
-        .catch {
-            throw it
-        }.flowOn(Dispatchers.IO)
+    }.catch {
+        throw it
+    }.flowOn(Dispatchers.IO)
 
 private suspend fun <T> FlowCollector<NetworkResult<T>>.emitSuccess(response: Response<T>) {
     val body = response.body() ?: run {

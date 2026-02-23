@@ -17,35 +17,29 @@ private val LightColorScheme = lightColorScheme(
     onPrimary = Color.White,
     primaryContainer = PrimaryLight,
     onPrimaryContainer = TextPrimaryLight,
-
     // Secondary colors
     secondary = Secondary,
     onSecondary = Color.White,
     secondaryContainer = SecondaryLight,
     onSecondaryContainer = TextPrimaryLight,
-
     // Tertiary colors (используем Accent)
     tertiary = Accent,
     onTertiary = TextPrimaryLight,
     tertiaryContainer = Accent,
     onTertiaryContainer = TextPrimaryLight,
-
     // Error colors (используем Danger)
     error = Danger,
     onError = Color.White,
     errorContainer = Danger,
     onErrorContainer = Color.White,
-
     // Background colors
     background = BackgroundLight,
     onBackground = TextPrimaryLight,
-
     // Surface colors (карточки)
     surface = CardBackgroundLight,
     onSurface = TextPrimaryLight,
     surfaceVariant = CardBackgroundLight,
     onSurfaceVariant = TextSecondaryLight,
-
     // Outline (границы)
     outline = BorderLight,
     outlineVariant = BorderLight
@@ -61,35 +55,29 @@ private val DarkColorScheme = darkColorScheme(
     onPrimary = Color.White,
     primaryContainer = PrimaryDark,
     onPrimaryContainer = Color.White,
-
     // Secondary colors (остаются яркими в тёмной теме)
     secondary = Secondary,
     onSecondary = Color.White,
     secondaryContainer = Secondary,
     onSecondaryContainer = Color.White,
-
     // Tertiary colors (используем Accent)
     tertiary = Accent,
     onTertiary = TextPrimaryDark,
     tertiaryContainer = Accent,
     onTertiaryContainer = TextPrimaryDark,
-
     // Error colors (используем Danger)
     error = Danger,
     onError = Color.White,
     errorContainer = Danger,
     onErrorContainer = Color.White,
-
     // Background colors
     background = BackgroundDark,
     onBackground = TextPrimaryDark,
-
     // Surface colors (карточки)
     surface = CardBackgroundDark,
     onSurface = TextPrimaryDark,
     surfaceVariant = CardBackgroundDark,
     onSurfaceVariant = TextSecondaryDark,
-
     // Outline (границы)
     outline = BorderDark,
     outlineVariant = BorderDark

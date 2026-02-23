@@ -15,6 +15,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -116,7 +117,7 @@ private fun ProductDetailContent(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Brush.verticalGradient(listOf(Primary, PrimaryDark)))
+                    .background(remember { Brush.verticalGradient(listOf(Primary, PrimaryDark)) })
                     .clip(RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp))
                     .padding(horizontal = 20.dp, vertical = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -129,7 +130,12 @@ private fun ProductDetailContent(
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, null, tint = Color.White)
                     }
-                    Text("Продукт", style = MaterialTheme.typography.titleLarge, color = Color.White, fontWeight = FontWeight.ExtraBold)
+                    Text(
+                        "Продукт",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = Color.White,
+                        fontWeight = FontWeight.ExtraBold
+                    )
                     Spacer(Modifier.width(48.dp))
                 }
 
@@ -148,7 +154,11 @@ private fun ProductDetailContent(
                     color = Color.White
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(uiState.calories.toInt().toString(), style = MaterialTheme.typography.displayLarge, color = Color.White)
+                        Text(
+                            uiState.calories.toInt().toString(),
+                            style = MaterialTheme.typography.displayLarge,
+                            color = Color.White
+                        )
                         Text("ккал", fontSize = 12.sp, color = Color.White.copy(0.8f))
                     }
                 }
@@ -177,24 +187,35 @@ private fun ProductDetailContent(
                             .width(60.dp)
                             .border(2.dp, Primary.copy(0.3f), RoundedCornerShape(10.dp))
                             .padding(8.dp),
-                        textStyle = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center),
+                        textStyle = TextStyle(
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        ),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                     )
 
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         PortionUnit.entries.forEach { unit ->
+                            val onUnitClick = remember(unit) { { onUnitSelected(unit) } }
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(10.dp))
                                     .background(if (uiState.selectedUnit == unit) Primary else Color(0xFFF3F4F6))
-                                    .clickable { onUnitSelected(unit) }
+                                    .clickable(onClick = onUnitClick)
                                     .padding(horizontal = 12.dp, vertical = 8.dp)
                             ) {
                                 Text(
                                     unit.label,
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = if (uiState.selectedUnit == unit) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = if (uiState.selectedUnit ==
+                                        unit
+                                    ) {
+                                        Color.White
+                                    } else {
+                                        MaterialTheme.colorScheme.onSurfaceVariant
+                                    }
                                 )
                             }
                         }
@@ -225,7 +246,12 @@ private fun ProductDetailContent(
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Primary)
         ) {
-            Text("Добавить в дневник", fontSize = 16.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 8.dp))
+            Text(
+                "Добавить в дневник",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
         }
 
         // Meal selection dialog

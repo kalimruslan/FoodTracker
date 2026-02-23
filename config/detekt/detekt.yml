@@ -1,0 +1,82 @@
+build:
+  maxIssues: 0
+
+config:
+  validation: true
+  warningsAsErrors: false
+
+complexity:
+  CyclomaticComplexMethod:
+    threshold: 15
+  LongMethod:
+    threshold: 60
+  LongParameterList:
+    functionThreshold: 8
+    constructorThreshold: 8
+    ignoreDefaultParameters: true
+  TooManyFunctions:
+    thresholdInFiles: 30
+    thresholdInClasses: 15
+    thresholdInInterfaces: 15
+    thresholdInObjects: 15
+    thresholdInEnums: 8
+
+naming:
+  FunctionNaming:
+    # Allow PascalCase for Composable functions
+    functionPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    ignoreAnnotated: ['Composable']
+  TopLevelPropertyNaming:
+    constantPattern: '[A-Z][_A-Z0-9]*'
+    propertyPattern: '[a-z][a-zA-Z0-9]*'
+    privatePropertyPattern: '_?[a-z][a-zA-Z0-9]*'
+
+style:
+  MagicNumber:
+    ignoreNumbers: ['-1', '0', '1', '2', '100', '0.5', '1f', '0f']
+    ignoreHashCodeFunction: true
+    ignorePropertyDeclaration: true
+    ignoreConstantDeclaration: true
+    ignoreCompanionObjectPropertyDeclaration: true
+    ignoreAnnotation: true
+    ignoreNamedArgument: true
+    ignoreEnums: true
+  ReturnCount:
+    max: 4
+  UnusedPrivateMember:
+    # @Preview Composable functions look unused but are used by Android Studio
+    ignoreAnnotated: ['Preview']
+  WildcardImport:
+    active: true
+    excludeImports:
+      - 'androidx.compose.foundation.layout.*'
+      - 'androidx.compose.material3.*'
+      - 'androidx.compose.material.icons.filled.*'
+      - 'androidx.compose.runtime.*'
+      - 'androidx.compose.ui.*'
+      - 'androidx.room.*'
+      - 'com.ruslan.foodtracker.core.ui.components.*'
+      - 'com.ruslan.foodtracker.core.ui.theme.*'
+      - 'org.junit.Assert.*'
+
+exceptions:
+  TooGenericExceptionCaught:
+    # Repositories intentionally catch broad exceptions to wrap them in NetworkResult
+    # Exception and Throwable intentionally omitted — repositories catch them broadly
+    # to wrap all errors in NetworkResult per project convention (see CLAUDE.md)
+    exceptionNames:
+      - ArrayIndexOutOfBoundsException
+      - Error
+      - IllegalMonitorStateException
+      - NullPointerException
+      - StackOverflowError
+    allowedExceptionNameRegex: '_|(ignore|expected).*'
+
+coroutines:
+  active: true
+  GlobalCoroutineUsage:
+    active: true
+  RedundantSuspendModifier:
+    active: true
+  SuspendFunWithFlowReturnType:
+    active: true

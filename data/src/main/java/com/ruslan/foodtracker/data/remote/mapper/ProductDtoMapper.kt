@@ -5,11 +5,8 @@ import com.ruslan.foodtracker.domain.model.Food
 
 /**
  * Маппер для конвертации ProductDto (Open Food Facts API) в Domain модель Food
- */
-
-/**
- * Конвертирует ProductDto в Food
  *
+ * Конвертирует ProductDto в Food.
  * @return Food domain модель или null если недостаточно данных
  */
 fun ProductDto.toDomain(): Food? {
@@ -76,6 +73,4 @@ private fun parseServingSize(servingSizeStr: String?): Pair<Double, String> {
 /**
  * Конвертирует список ProductDto в список Food, отфильтровывая null значения
  */
-fun List<ProductDto>.toDomainList(): List<Food> {
-    return this.mapNotNull { it.toDomain() }
-}
+fun List<ProductDto>.toDomainList(): List<Food> = this.mapNotNull { it.toDomain() }

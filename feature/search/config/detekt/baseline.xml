@@ -1,0 +1,25 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues></ManuallySuppressedIssues>
+  <CurrentIssues>
+    <ID>ForbiddenComment:SearchScreen.kt$/* TODO: open camera */</ID>
+    <ID>ForbiddenComment:SearchViewModel.kt$SearchViewModel$// TODO: Load data for selected tab</ID>
+    <ID>LambdaParameterInRestartableEffect:SearchScreen.kt$onLoadNextPage</ID>
+    <ID>LongMethod:SearchScreen.kt$@Composable private fun ProductList( uiState: SearchUiState, onProductClick: (ProductData) -&gt; Unit, onToggleFavorite: (String) -&gt; Unit, onLoadNextPage: () -&gt; Unit, onRetryPagination: () -&gt; Unit, onDismissPaginationError: () -&gt; Unit )</ID>
+    <ID>LongMethod:SearchScreen.kt$@Composable private fun SearchScreenContent( uiState: SearchUiState, onProductClick: (ProductData) -&gt; Unit, onNavigateBack: () -&gt; Unit, onSearchQueryChanged: (String) -&gt; Unit, onTabSelected: (SearchTab) -&gt; Unit, onToggleFavorite: (String) -&gt; Unit, onLoadNextPage: () -&gt; Unit, onRetrySearch: () -&gt; Unit, onDismissError: () -&gt; Unit, onRetryPagination: () -&gt; Unit, onDismissPaginationError: () -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>LongParameterList:SearchScreen.kt$( uiState: SearchUiState, onProductClick: (ProductData) -&gt; Unit, onNavigateBack: () -&gt; Unit, onSearchQueryChanged: (String) -&gt; Unit, onTabSelected: (SearchTab) -&gt; Unit, onToggleFavorite: (String) -&gt; Unit, onLoadNextPage: () -&gt; Unit, onRetrySearch: () -&gt; Unit, onDismissError: () -&gt; Unit, onRetryPagination: () -&gt; Unit, onDismissPaginationError: () -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>MagicNumber:SearchScreen.kt$0xFFF3F4F6</ID>
+    <ID>MagicNumber:SearchScreen.kt$1.2f</ID>
+    <ID>MagicNumber:SearchScreen.kt$1.8f</ID>
+    <ID>MagicNumber:SearchScreen.kt$110</ID>
+    <ID>MagicNumber:SearchScreen.kt$121</ID>
+    <ID>MagicNumber:SearchScreen.kt$17.2f</ID>
+    <ID>MagicNumber:SearchScreen.kt$23.1f</ID>
+    <ID>MagicNumber:SearchScreen.kt$3</ID>
+    <ID>MagicNumber:SearchScreen.kt$5.0f</ID>
+    <ID>MagicNumber:SearchViewModel.kt$SearchViewModel$500</ID>
+    <ID>ParameterNaming:SearchScreen.kt$onQueryChanged</ID>
+    <ID>ParameterNaming:SearchScreen.kt$onSearchQueryChanged</ID>
+    <ID>ParameterNaming:SearchScreen.kt$onTabSelected</ID>
+  </CurrentIssues>
+</SmellBaseline>

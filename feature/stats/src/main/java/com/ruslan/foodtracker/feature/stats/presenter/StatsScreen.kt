@@ -9,7 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -28,6 +28,8 @@ fun StatsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    val headerBrush = remember { Brush.verticalGradient(listOf(Primary, PrimaryDark)) }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -37,11 +39,17 @@ fun StatsScreen(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Brush.verticalGradient(listOf(Primary, PrimaryDark)))
+                .background(headerBrush)
                 .clip(RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp))
                 .padding(20.dp)
         ) {
-            Text("Статистика", style = MaterialTheme.typography.titleLarge, color = Color.White, fontWeight = FontWeight.ExtraBold, modifier = Modifier.fillMaxWidth())
+            Text(
+                "Статистика",
+                style = MaterialTheme.typography.titleLarge,
+                color = Color.White,
+                fontWeight = FontWeight.ExtraBold,
+                modifier = Modifier.fillMaxWidth()
+            )
             Spacer(Modifier.height(16.dp))
             BarChart(
                 data = uiState.weekCalories,
@@ -54,7 +62,12 @@ fun StatsScreen(
         Spacer(Modifier.height(16.dp))
 
         // Average stats
-        Text("Средние показатели", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(horizontal = 16.dp))
+        Text(
+            "Средние показатели",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.ExtraBold,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
         Spacer(Modifier.height(10.dp))
 
         Row(modifier = Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -70,11 +83,23 @@ fun StatsScreen(
 }
 
 @Composable
-private fun StatCard(icon: String, label: String, value: String, unit: String, color: androidx.compose.ui.graphics.Color, modifier: Modifier = Modifier) {
+private fun StatCard(
+    icon: String,
+    label: String,
+    value: String,
+    unit: String,
+    color: androidx.compose.ui.graphics.Color,
+    modifier: Modifier = Modifier
+) {
     Card(modifier = modifier, shape = RoundedCornerShape(14.dp)) {
         Column(modifier = Modifier.padding(14.dp)) {
             Text(icon, fontSize = 20.sp)
-            Text(label, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.SemiBold)
+            Text(
+                label,
+                fontSize = 11.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.SemiBold
+            )
             Text(value, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, color = color)
             Text(unit, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }

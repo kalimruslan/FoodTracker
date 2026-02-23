@@ -10,6 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,6 +31,8 @@ fun ProfileScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    val headerBrush = remember { Brush.verticalGradient(listOf(Primary, PrimaryDark)) }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -39,14 +42,22 @@ fun ProfileScreen(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Brush.verticalGradient(listOf(Primary, PrimaryDark)))
+                .background(headerBrush)
                 .clip(RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp))
                 .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Профиль", style = MaterialTheme.typography.titleLarge, color = Color.White, fontWeight = FontWeight.ExtraBold)
+            Text(
+                "Профиль",
+                style = MaterialTheme.typography.titleLarge,
+                color = Color.White,
+                fontWeight = FontWeight.ExtraBold
+            )
             Spacer(Modifier.height(20.dp))
-            Box(Modifier.size(80.dp).clip(CircleShape).background(Color.White.copy(0.2f)), contentAlignment = Alignment.Center) {
+            Box(
+                Modifier.size(80.dp).clip(CircleShape).background(Color.White.copy(0.2f)),
+                contentAlignment = Alignment.Center
+            ) {
                 Text("👤", fontSize = 36.sp)
             }
             Spacer(Modifier.height(12.dp))
@@ -56,7 +67,12 @@ fun ProfileScreen(
 
         Spacer(Modifier.height(16.dp))
 
-        Text("Динамика веса", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(horizontal = 16.dp))
+        Text(
+            "Динамика веса",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.ExtraBold,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
         Spacer(Modifier.height(10.dp))
 
         Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), shape = RoundedCornerShape(16.dp)) {
@@ -69,7 +85,12 @@ fun ProfileScreen(
 
         Spacer(Modifier.height(16.dp))
 
-        Text("Напоминания", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(horizontal = 16.dp))
+        Text(
+            "Напоминания",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.ExtraBold,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
         Spacer(Modifier.height(10.dp))
 
         Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), shape = RoundedCornerShape(16.dp)) {

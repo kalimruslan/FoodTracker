@@ -16,28 +16,22 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
-
     @Provides
     @Singleton
     fun provideFoodTrackerDatabase(
         @ApplicationContext context: Context
-    ): FoodTrackerDatabase {
-        return Room.databaseBuilder(
-            context,
-            FoodTrackerDatabase::class.java,
-            Constants.DATABASE_NAME
-        )
-            .fallbackToDestructiveMigration()
+    ): FoodTrackerDatabase =
+        Room
+            .databaseBuilder(
+                context,
+                FoodTrackerDatabase::class.java,
+                Constants.DATABASE_NAME
+            ).fallbackToDestructiveMigration()
             .build()
-    }
 
     @Provides
-    fun provideFoodDao(database: FoodTrackerDatabase): FoodDao {
-        return database.foodDao()
-    }
+    fun provideFoodDao(database: FoodTrackerDatabase): FoodDao = database.foodDao()
 
     @Provides
-    fun provideFoodEntryDao(database: FoodTrackerDatabase): FoodEntryDao {
-        return database.foodEntryDao()
-    }
+    fun provideFoodEntryDao(database: FoodTrackerDatabase): FoodEntryDao = database.foodEntryDao()
 }

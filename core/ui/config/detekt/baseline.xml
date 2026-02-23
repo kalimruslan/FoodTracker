@@ -1,0 +1,69 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues></ManuallySuppressedIssues>
+  <CurrentIssues>
+    <ID>ComposableParamOrder:NutrientGrid.kt$NutrientGrid</ID>
+    <ID>CyclomaticComplexMethod:ErrorMapper.kt$@StringRes fun DomainError.toStringRes(): Int</ID>
+    <ID>ForbiddenComment:Type.kt$// TODO: Добавить Nunito .ttf файлы в res/font/ для полной поддержки</ID>
+    <ID>ImplicitDefaultLocale:ProductCard.kt$String.format("%.1f", value)</ID>
+    <ID>LongMethod:MealCard.kt$@Composable fun MealCard( emoji: String, name: String, time: String?, totalCalories: Int, foodItems: List&lt;FoodItemData&gt;, onAddClick: () -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>LongMethod:ProductCard.kt$@Composable fun ProductCard( product: ProductData, onClick: () -&gt; Unit, onFavoriteClick: () -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>MagicNumber:BarChart.kt$0.1f</ID>
+    <ID>MagicNumber:BarChart.kt$0.7f</ID>
+    <ID>MagicNumber:BarChart.kt$130.2f</ID>
+    <ID>MagicNumber:BarChart.kt$130.8f</ID>
+    <ID>MagicNumber:BarChart.kt$130f</ID>
+    <ID>MagicNumber:BarChart.kt$131.5f</ID>
+    <ID>MagicNumber:BarChart.kt$132f</ID>
+    <ID>MagicNumber:BarChart.kt$133.5f</ID>
+    <ID>MagicNumber:BarChart.kt$135f</ID>
+    <ID>MagicNumber:BarChart.kt$1680f</ID>
+    <ID>MagicNumber:BarChart.kt$1780f</ID>
+    <ID>MagicNumber:BarChart.kt$1850f</ID>
+    <ID>MagicNumber:BarChart.kt$1950f</ID>
+    <ID>MagicNumber:BarChart.kt$2050f</ID>
+    <ID>MagicNumber:BarChart.kt$2100f</ID>
+    <ID>MagicNumber:BarChart.kt$2200f</ID>
+    <ID>MagicNumber:BarChart.kt$2250f</ID>
+    <ID>MagicNumber:CircularProgress.kt$360f</ID>
+    <ID>MagicNumber:MealCard.kt$150</ID>
+    <ID>MagicNumber:MealCard.kt$165</ID>
+    <ID>MagicNumber:MealCard.kt$216</ID>
+    <ID>MagicNumber:MealCard.kt$64</ID>
+    <ID>MagicNumber:MealCard.kt$89</ID>
+    <ID>MagicNumber:Toggle.kt$0xFFD1D5DB</ID>
+    <ID>MatchingDeclarationName:BarChart.kt$BarData</ID>
+    <ID>MatchingDeclarationName:MealCard.kt$FoodItemData</ID>
+    <ID>MatchingDeclarationName:NutrientGrid.kt$NutrientData</ID>
+    <ID>MatchingDeclarationName:ProductCard.kt$ProductData</ID>
+    <ID>SpreadOperator:ErrorMessageProvider.kt$(stringResId, *formatArgs)</ID>
+    <ID>SpreadOperator:ErrorMessageProvider.kt$ErrorMessageProvider$(stringResId, *formatArgs)</ID>
+    <ID>TopLevelPropertyNaming:Color.kt$// Accent &amp; Status Colors val Accent = Color(0xFFFFBF69)</ID>
+    <ID>TopLevelPropertyNaming:Color.kt$// Dark Theme Colors val BackgroundDark = Color(0xFF1A1A2E)</ID>
+    <ID>TopLevelPropertyNaming:Color.kt$// Light Theme Colors val BackgroundLight = Color(0xFFFAFAFA)</ID>
+    <ID>TopLevelPropertyNaming:Color.kt$// Nutrient Colors (одинаковы для обеих тем) val ProteinColor = Color(0xFF5B8DEF)</ID>
+    <ID>TopLevelPropertyNaming:Color.kt$// Primary Colors val Primary = Color(0xFFFF6B35)</ID>
+    <ID>TopLevelPropertyNaming:Color.kt$// Secondary Colors val Secondary = Color(0xFF2EC4B6)</ID>
+    <ID>TopLevelPropertyNaming:Color.kt$val BorderDark = Color(0xFF374151)</ID>
+    <ID>TopLevelPropertyNaming:Color.kt$val BorderLight = Color(0xFFE5E7EB)</ID>
+    <ID>TopLevelPropertyNaming:Color.kt$val CarbsColor = Color(0xFFFFBF69)</ID>
+    <ID>TopLevelPropertyNaming:Color.kt$val CardBackgroundDark = Color(0xFF252542)</ID>
+    <ID>TopLevelPropertyNaming:Color.kt$val CardBackgroundLight = Color(0xFFFFFFFF)</ID>
+    <ID>TopLevelPropertyNaming:Color.kt$val Danger = Color(0xFFE63946)</ID>
+    <ID>TopLevelPropertyNaming:Color.kt$val FatColor = Color(0xFFE63946)</ID>
+    <ID>TopLevelPropertyNaming:Color.kt$val FiberColor = Color(0xFF2EC4B6)</ID>
+    <ID>TopLevelPropertyNaming:Color.kt$val PrimaryDark = Color(0xFFE55A25)</ID>
+    <ID>TopLevelPropertyNaming:Color.kt$val PrimaryLight = Color(0xFFFF8F5E)</ID>
+    <ID>TopLevelPropertyNaming:Color.kt$val SecondaryLight = Color(0xFF4DD4C8)</ID>
+    <ID>TopLevelPropertyNaming:Color.kt$val Success = Color(0xFF2EC4B6)</ID>
+    <ID>TopLevelPropertyNaming:Color.kt$val TextPrimaryDark = Color(0xFFFFFFFF)</ID>
+    <ID>TopLevelPropertyNaming:Color.kt$val TextPrimaryLight = Color(0xFF1A1A2E)</ID>
+    <ID>TopLevelPropertyNaming:Color.kt$val TextSecondaryDark = Color(0xFF9CA3AF)</ID>
+    <ID>TopLevelPropertyNaming:Color.kt$val TextSecondaryLight = Color(0xFF6B7280)</ID>
+    <ID>TopLevelPropertyNaming:Color.kt$val Warning = Color(0xFFFFBF69)</ID>
+    <ID>TopLevelPropertyNaming:Theme.kt$/** * Светлая цветовая схема Food Tracker * Согласно дизайн-спецификации */ private val LightColorScheme = lightColorScheme( // Primary colors primary = Primary, onPrimary = Color.White, primaryContainer = PrimaryLight, onPrimaryContainer = TextPrimaryLight, // Secondary colors secondary = Secondary, onSecondary = Color.White, secondaryContainer = SecondaryLight, onSecondaryContainer = TextPrimaryLight, // Tertiary colors (используем Accent) tertiary = Accent, onTertiary = TextPrimaryLight, tertiaryContainer = Accent, onTertiaryContainer = TextPrimaryLight, // Error colors (используем Danger) error = Danger, onError = Color.White, errorContainer = Danger, onErrorContainer = Color.White, // Background colors background = BackgroundLight, onBackground = TextPrimaryLight, // Surface colors (карточки) surface = CardBackgroundLight, onSurface = TextPrimaryLight, surfaceVariant = CardBackgroundLight, onSurfaceVariant = TextSecondaryLight, // Outline (границы) outline = BorderLight, outlineVariant = BorderLight )</ID>
+    <ID>TopLevelPropertyNaming:Theme.kt$/** * Тёмная цветовая схема Food Tracker * Согласно дизайн-спецификации */ private val DarkColorScheme = darkColorScheme( // Primary colors (остаются яркими в тёмной теме) primary = Primary, onPrimary = Color.White, primaryContainer = PrimaryDark, onPrimaryContainer = Color.White, // Secondary colors (остаются яркими в тёмной теме) secondary = Secondary, onSecondary = Color.White, secondaryContainer = Secondary, onSecondaryContainer = Color.White, // Tertiary colors (используем Accent) tertiary = Accent, onTertiary = TextPrimaryDark, tertiaryContainer = Accent, onTertiaryContainer = TextPrimaryDark, // Error colors (используем Danger) error = Danger, onError = Color.White, errorContainer = Danger, onErrorContainer = Color.White, // Background colors background = BackgroundDark, onBackground = TextPrimaryDark, // Surface colors (карточки) surface = CardBackgroundDark, onSurface = TextPrimaryDark, surfaceVariant = CardBackgroundDark, onSurfaceVariant = TextSecondaryDark, // Outline (границы) outline = BorderDark, outlineVariant = BorderDark )</ID>
+    <ID>TopLevelPropertyNaming:Type.kt$// Typography согласно дизайн-спецификации val Typography = Typography( // Большие цифры (калории) - 28-36sp, ExtraBold (800) displayLarge = TextStyle( fontFamily = NunitoFontFamily, fontWeight = FontWeight.ExtraBold, fontSize = 36.sp, lineHeight = 44.sp, letterSpacing = 0.sp ), displayMedium = TextStyle( fontFamily = NunitoFontFamily, fontWeight = FontWeight.ExtraBold, fontSize = 28.sp, lineHeight = 36.sp, letterSpacing = 0.sp ), // Заголовок экрана - 18-20sp, ExtraBold (800) titleLarge = TextStyle( fontFamily = NunitoFontFamily, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp, lineHeight = 28.sp, letterSpacing = 0.sp ), // Заголовок секции - 16-17sp, ExtraBold (800) titleMedium = TextStyle( fontFamily = NunitoFontFamily, fontWeight = FontWeight.ExtraBold, fontSize = 17.sp, lineHeight = 24.sp, letterSpacing = 0.sp ), // Название продукта/приёма - 14-15sp, Bold (700) titleSmall = TextStyle( fontFamily = NunitoFontFamily, fontWeight = FontWeight.Bold, fontSize = 15.sp, lineHeight = 20.sp, letterSpacing = 0.sp ), // Обычный текст - 13-14sp, Regular (400) bodyLarge = TextStyle( fontFamily = NunitoFontFamily, fontWeight = FontWeight.Normal, fontSize = 14.sp, lineHeight = 20.sp, letterSpacing = 0.25.sp ), bodyMedium = TextStyle( fontFamily = NunitoFontFamily, fontWeight = FontWeight.Normal, fontSize = 13.sp, lineHeight = 18.sp, letterSpacing = 0.25.sp ), // Подпись/мета - 10-12sp, SemiBold (600) labelLarge = TextStyle( fontFamily = NunitoFontFamily, fontWeight = FontWeight.SemiBold, fontSize = 12.sp, lineHeight = 16.sp, letterSpacing = 0.5.sp ), labelMedium = TextStyle( fontFamily = NunitoFontFamily, fontWeight = FontWeight.SemiBold, fontSize = 11.sp, lineHeight = 16.sp, letterSpacing = 0.5.sp ), labelSmall = TextStyle( fontFamily = NunitoFontFamily, fontWeight = FontWeight.SemiBold, fontSize = 10.sp, lineHeight = 14.sp, letterSpacing = 0.5.sp ) )</ID>
+    <ID>TopLevelPropertyNaming:Type.kt$// Используем SansSerif как fallback для Nunito // TODO: Добавить Nunito .ttf файлы в res/font/ для полной поддержки private val NunitoFontFamily = FontFamily.SansSerif</ID>
+  </CurrentIssues>
+</SmellBaseline>

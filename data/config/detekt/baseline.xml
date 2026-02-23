@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues></ManuallySuppressedIssues>
+  <CurrentIssues>
+    <ID>MagicNumber:ApiUtils.kt$400</ID>
+    <ID>MagicNumber:ApiUtils.kt$500</ID>
+    <ID>TopLevelPropertyNaming:FoodTrackerDatabase.kt$/** * Миграция с версии 1 на версию 2 * Добавляет новые поля в таблицу foods: fiber, barcode, brand, imageUrl */ val MIGRATION_1_2 = object : Migration(1, 2) { override fun migrate(db: SupportSQLiteDatabase) { db.execSQL("ALTER TABLE foods ADD COLUMN fiber REAL NOT NULL DEFAULT 0.0") db.execSQL("ALTER TABLE foods ADD COLUMN barcode TEXT") db.execSQL("ALTER TABLE foods ADD COLUMN brand TEXT") db.execSQL("ALTER TABLE foods ADD COLUMN imageUrl TEXT") } }</ID>
+    <ID>TopLevelPropertyNaming:FoodTrackerDatabase.kt$/** * Миграция с версии 2 на версию 3 * Добавляет уникальный индекс на поле barcode для предотвращения дубликатов * * Примечание: UNIQUE constraint позволяет несколько NULL значений, * что важно для продуктов созданных вручную (без barcode) */ val MIGRATION_2_3 = object : Migration(2, 3) { override fun migrate(db: SupportSQLiteDatabase) { // Создаем уникальный индекс на barcode db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_foods_barcode ON foods(barcode)") } }</ID>
+    <ID>UnusedParameter:Utils.kt$response: Response&lt;T&gt;</ID>
+  </CurrentIssues>
+</SmellBaseline>

@@ -7,9 +7,14 @@ import java.time.LocalDate
 
 interface FoodEntryRepository {
     fun getAllEntries(): Flow<NetworkResult<List<FoodEntry>>>
+
     fun getEntriesByDate(date: LocalDate): Flow<NetworkResult<List<FoodEntry>>>
+
     suspend fun getEntryById(id: Long): NetworkResult<FoodEntry>
+
     suspend fun insertEntry(entry: FoodEntry): NetworkResult<Long>
+
     suspend fun updateEntry(entry: FoodEntry): NetworkResult<Unit>
+
     suspend fun deleteEntry(entry: FoodEntry): NetworkResult<Unit>
 }

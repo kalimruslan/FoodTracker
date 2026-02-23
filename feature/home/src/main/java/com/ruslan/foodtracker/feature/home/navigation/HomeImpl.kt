@@ -14,28 +14,29 @@ import javax.inject.Singleton
  * Реализация навигации для feature:home модуля.
  */
 @Singleton
-class HomeImpl @Inject constructor() : HomeApi {
+class HomeImpl
+    @Inject
+    constructor() : HomeApi {
+        override val baseRoute = "home"
 
-    override val baseRoute = "home"
+        override fun registerGraph(
+            navGraphBuilder: NavGraphBuilder,
+            navController: NavHostController
+        ) {
+            navGraphBuilder.composable<NavRoutes.Home> {
+                HomeScreen(
+                    onNavigateToSearch = { mealType, date ->
+                        navController.navigate(NavRoutes.Search(mealType = mealType, date = date))
+                    }
+                )
+            }
 
-    override fun registerGraph(
-        navGraphBuilder: NavGraphBuilder,
-        navController: NavHostController
-    ) {
-        navGraphBuilder.composable<NavRoutes.Home> {
-            HomeScreen(
-                onNavigateToSearch = { mealType, date ->
-                    navController.navigate(NavRoutes.Search(mealType = mealType, date = date))
-                }
-            )
-        }
-
-        navGraphBuilder.composable<NavRoutes.AddFoodEntry> { backStackEntry ->
-            val route = backStackEntry.toRoute<NavRoutes.AddFoodEntry>()
-            AddFoodEntryScreen(
-                route = route,
-                onNavigateBack = { navController.navigateUp() }
-            )
+            navGraphBuilder.composable<NavRoutes.AddFoodEntry> { backStackEntry ->
+                val route = backStackEntry.toRoute<NavRoutes.AddFoodEntry>()
+                AddFoodEntryScreen(
+                    route = route,
+                    onNavigateBack = { navController.navigateUp() }
+                )
+            }
         }
     }
-}

@@ -54,11 +54,9 @@ fun FoodTrackerToggle(
                 } else {
                     if (enabled) Color(0xFFD1D5DB) else Color(0xFFD1D5DB).copy(alpha = 0.5f)
                 }
-            )
-            .clickable(enabled = enabled) {
+            ).clickable(enabled = enabled) {
                 onCheckedChange(!checked)
-            }
-            .padding(2.dp),
+            }.padding(2.dp),
         contentAlignment = Alignment.CenterStart
     ) {
         Box(
@@ -69,8 +67,7 @@ fun FoodTrackerToggle(
                     elevation = 1.dp,
                     shape = CircleShape,
                     ambientColor = Color.Black.copy(alpha = 0.15f)
-                )
-                .clip(CircleShape)
+                ).clip(CircleShape)
                 .background(Color.White)
         )
     }

@@ -1,7 +1,6 @@
 package com.ruslan.foodtracker.navigation
 
 import androidx.compose.foundation.Canvas
-import com.ruslan.foodtracker.core.navigation.NavRoutes
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -14,6 +13,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.ruslan.foodtracker.core.navigation.NavRoutes
 import com.ruslan.foodtracker.core.ui.theme.FoodTrackerTheme
 import com.ruslan.foodtracker.core.ui.theme.Primary
 
@@ -121,8 +121,8 @@ private enum class BottomNavItem(
 /**
  * Проверяет, должен ли отображаться Bottom Navigation Bar для данного маршрута
  */
-fun shouldShowBottomBar(currentRoute: NavRoutes?): Boolean {
-    return when (currentRoute) {
+fun shouldShowBottomBar(currentRoute: NavRoutes?): Boolean =
+    when (currentRoute) {
         is NavRoutes.Home,
         is NavRoutes.Search,
         is NavRoutes.Stats,
@@ -131,7 +131,6 @@ fun shouldShowBottomBar(currentRoute: NavRoutes?): Boolean {
         is NavRoutes.AddFoodEntry -> false
         null -> true
     }
-}
 
 // ========== Preview ==========
 

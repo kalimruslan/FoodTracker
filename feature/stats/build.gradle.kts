@@ -28,18 +28,14 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
-
-    lint {
-        disable += "NullSafeMutableLiveData"
-    }
 }
 
 dependencies {
     // Core modules
-    implementation(project(":core:navigation"))  // NavRoutes, FeatureApi
-    implementation(project(":core:ui"))          // Theme, Components
-    implementation(project(":core:common"))      // Utils
-    implementation(project(":domain"))           // UseCases, Models
+    implementation(project(":core:navigation")) // NavRoutes, FeatureApi
+    implementation(project(":core:ui")) // Theme, Components
+    implementation(project(":core:common")) // Utils
+    implementation(project(":domain")) // UseCases, Models
 
     // НЕТ зависимостей на другие feature модули!
     // НЕТ зависимости на app модуль!

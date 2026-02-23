@@ -6,8 +6,10 @@ import com.ruslan.foodtracker.domain.repository.FoodRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class GetAllFoodsUseCase @Inject constructor(
-    private val repository: FoodRepository
-) {
-    operator fun invoke(): Flow<NetworkResult<List<Food>>> = repository.getAllFoods()
-}
+class GetAllFoodsUseCase
+    @Inject
+    constructor(
+        private val repository: FoodRepository
+    ) {
+        operator fun invoke(): Flow<NetworkResult<List<Food>>> = repository.getAllFoods()
+    }

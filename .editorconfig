@@ -1,0 +1,22 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_size = 4
+indent_style = space
+insert_final_newline = true
+max_line_length = 120
+trim_trailing_whitespace = true
+
+[*.{kt,kts}]
+ktlint_standard_no-wildcard-imports = enabled
+# Allow wildcard imports for Compose and Room packages commonly used in this project
+ij_kotlin_packages_to_use_import_on_demand = androidx.compose.foundation.layout,androidx.compose.material3,androidx.compose.material.icons.filled,androidx.compose.runtime,androidx.compose.ui,androidx.room,org.junit.Assert,com.ruslan.foodtracker.core.ui.components,com.ruslan.foodtracker.core.ui.theme
+ktlint_standard_import-ordering = enabled
+ktlint_standard_max-line-length = enabled
+ktlint_standard_trailing-comma-on-call-site = disabled
+ktlint_standard_trailing-comma-on-declaration-site = disabled
+ktlint_standard_multiline-expression-wrapping = disabled
+# Composable functions use PascalCase — disable ktlint's lowerCamelCase enforcement
+ktlint_standard_function-naming = disabled

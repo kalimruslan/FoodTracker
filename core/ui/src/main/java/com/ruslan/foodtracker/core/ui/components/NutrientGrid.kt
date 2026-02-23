@@ -130,8 +130,7 @@ private fun NutrientCard(
                 elevation = 1.dp,
                 shape = RoundedCornerShape(14.dp),
                 ambientColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.04f)
-            )
-            .border(
+            ).border(
                 width = 1.dp,
                 color = MaterialTheme.colorScheme.outline,
                 shape = RoundedCornerShape(14.dp)
