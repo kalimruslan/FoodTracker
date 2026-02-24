@@ -19,7 +19,6 @@ import java.time.LocalDateTime
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class GetRecentFoodEntriesUseCaseTest {
-
     @MockK
     private lateinit var repository: FoodEntryRepository
 
@@ -48,78 +47,84 @@ class GetRecentFoodEntriesUseCaseTest {
     // ---- Test: invoke() delegates to repository.getRecentEntries with correct default limit ----
 
     @Test
-    fun `invoke delegates to repository getRecentEntries with default limit of 20`() = runTest {
-        val entries = listOf(sampleEntry)
-        every { repository.getRecentEntries(20) } returns flowOf(NetworkResult.Success(entries))
+    fun `invoke delegates to repository getRecentEntries with default limit of 20`() =
+        runTest {
+            val entries = listOf(sampleEntry)
+            every { repository.getRecentEntries(20) } returns flowOf(NetworkResult.Success(entries))
 
-        val results = useCase().toList()
+            val results = useCase().toList()
 
-        verify(exactly = 1) { repository.getRecentEntries(20) }
-        assertEquals(1, results.size)
-        val result = results.first()
-        assertEquals(NetworkResult.Success(entries), result)
-    }
+            verify(exactly = 1) { repository.getRecentEntries(20) }
+            assertEquals(1, results.size)
+            val result = results.first()
+            assertEquals(NetworkResult.Success(entries), result)
+        }
 
     // ---- Test: invoke() with custom limit passes it through ----
 
     @Test
-    fun `invoke with custom limit passes it through to repository`() = runTest {
-        val customLimit = 5
-        val entries = listOf(sampleEntry)
-        every { repository.getRecentEntries(customLimit) } returns flowOf(NetworkResult.Success(entries))
+    fun `invoke with custom limit passes it through to repository`() =
+        runTest {
+            val customLimit = 5
+            val entries = listOf(sampleEntry)
+            every { repository.getRecentEntries(customLimit) } returns flowOf(NetworkResult.Success(entries))
 
-        val results = useCase(limit = customLimit).toList()
+            val results = useCase(limit = customLimit).toList()
 
-        verify(exactly = 1) { repository.getRecentEntries(customLimit) }
-        assertEquals(1, results.size)
-        assertEquals(NetworkResult.Success(entries), results.first())
-    }
-
-    @Test
-    fun `invoke with limit 1 returns only one entry from repository`() = runTest {
-        val entries = listOf(sampleEntry)
-        every { repository.getRecentEntries(1) } returns flowOf(NetworkResult.Success(entries))
-
-        val results = useCase(limit = 1).toList()
-
-        verify(exactly = 1) { repository.getRecentEntries(1) }
-        assertEquals(NetworkResult.Success(entries), results.first())
-    }
+            verify(exactly = 1) { repository.getRecentEntries(customLimit) }
+            assertEquals(1, results.size)
+            assertEquals(NetworkResult.Success(entries), results.first())
+        }
 
     @Test
-    fun `invoke propagates loading state from repository`() = runTest {
-        every { repository.getRecentEntries(20) } returns flowOf(
-            NetworkResult.Loading,
-            NetworkResult.Success(emptyList()),
-        )
+    fun `invoke with limit 1 returns only one entry from repository`() =
+        runTest {
+            val entries = listOf(sampleEntry)
+            every { repository.getRecentEntries(1) } returns flowOf(NetworkResult.Success(entries))
 
-        val results = useCase().toList()
+            val results = useCase(limit = 1).toList()
 
-        assertEquals(2, results.size)
-        assertEquals(NetworkResult.Loading, results[0])
-        assertEquals(NetworkResult.Success(emptyList<FoodEntry>()), results[1])
-    }
+            verify(exactly = 1) { repository.getRecentEntries(1) }
+            assertEquals(NetworkResult.Success(entries), results.first())
+        }
 
     @Test
-    fun `invoke propagates error state from repository`() = runTest {
-        val errorResult = NetworkResult.Error(
-            com.ruslan.foodtracker.domain.error.DomainError.Database.FetchFailed,
-        )
-        every { repository.getRecentEntries(20) } returns flowOf(errorResult)
+    fun `invoke propagates loading state from repository`() =
+        runTest {
+            every { repository.getRecentEntries(20) } returns flowOf(
+                NetworkResult.Loading,
+                NetworkResult.Success(emptyList()),
+            )
 
-        val results = useCase().toList()
+            val results = useCase().toList()
 
-        assertEquals(1, results.size)
-        assertEquals(errorResult, results.first())
-    }
+            assertEquals(2, results.size)
+            assertEquals(NetworkResult.Loading, results[0])
+            assertEquals(NetworkResult.Success(emptyList<FoodEntry>()), results[1])
+        }
 
     @Test
-    fun `invoke with large limit delegates correctly`() = runTest {
-        val largeLimit = 100
-        every { repository.getRecentEntries(largeLimit) } returns flowOf(NetworkResult.Success(emptyList()))
+    fun `invoke propagates error state from repository`() =
+        runTest {
+            val errorResult = NetworkResult.Error(
+                com.ruslan.foodtracker.domain.error.DomainError.Database.FetchFailed,
+            )
+            every { repository.getRecentEntries(20) } returns flowOf(errorResult)
 
-        useCase(limit = largeLimit).toList()
+            val results = useCase().toList()
 
-        verify(exactly = 1) { repository.getRecentEntries(largeLimit) }
-    }
+            assertEquals(1, results.size)
+            assertEquals(errorResult, results.first())
+        }
+
+    @Test
+    fun `invoke with large limit delegates correctly`() =
+        runTest {
+            val largeLimit = 100
+            every { repository.getRecentEntries(largeLimit) } returns flowOf(NetworkResult.Success(emptyList()))
+
+            useCase(limit = largeLimit).toList()
+
+            verify(exactly = 1) { repository.getRecentEntries(largeLimit) }
+        }
 }

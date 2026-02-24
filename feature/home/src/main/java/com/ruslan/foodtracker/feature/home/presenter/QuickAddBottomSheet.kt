@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
@@ -43,7 +42,6 @@ import com.ruslan.foodtracker.core.ui.theme.FoodTrackerTheme
 import com.ruslan.foodtracker.domain.model.Food
 import com.ruslan.foodtracker.domain.model.FoodEntry
 import com.ruslan.foodtracker.domain.model.MealType
-import java.time.LocalDateTime
 
 /**
  * Bottom sheet для быстрого добавления продуктов в приём пищи.
@@ -184,7 +182,11 @@ private fun FoodSelectionStep(
                         items(uiState.recentEntries, key = { it.id }) { entry ->
                             FoodListItem(
                                 name = entry.foodName,
-                                calories = (entry.calories.toDouble() / entry.amountGrams.coerceAtLeast(1.0) * 100).toInt(),
+                                calories = (
+                                    entry.calories.toDouble() / entry.amountGrams.coerceAtLeast(
+                                        1.0
+                                    ) * 100
+                                ).toInt(),
                                 servingInfo = "100г",
                                 onClick = { onRecentEntrySelected(entry) },
                             )

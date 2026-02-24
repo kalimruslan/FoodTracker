@@ -46,6 +46,7 @@ fun HomeScreen(
     val quickAddUiState by quickAddViewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
+    // Snackbar "Добавлено в дневник" после QuickAdd
     LaunchedEffect(quickAddUiState.isSaved) {
         if (quickAddUiState.isSaved) {
             snackbarHostState.showSnackbar("Добавлено в дневник")
@@ -53,7 +54,24 @@ fun HomeScreen(
         }
     }
 
+    // Snackbar "Продукт удалён" с кнопкой Undo после свайп-удаления
+    LaunchedEffect(uiState.showDeleteSnackbar) {
+        if (uiState.showDeleteSnackbar) {
+            val result = snackbarHostState.showSnackbar(
+                message = "Продукт удалён",
+                actionLabel = "Отменить",
+                duration = SnackbarDuration.Short,
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                viewModel.onUndoDelete()
+            } else {
+                viewModel.onDeleteSnackbarDismissed()
+            }
+        }
+    }
+
     Scaffold(
+        modifier = modifier,
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         HomeScreenContent(
@@ -64,11 +82,13 @@ fun HomeScreen(
             onNavigateToSearch = onNavigateToSearch,
             onDaySelected = viewModel::onDaySelected,
             onAddWaterGlass = viewModel::onAddWaterGlass,
-            modifier = modifier.padding(padding),
+            onDeleteItem = viewModel::onDeleteEntry,
+            onEditItem = viewModel::onEditEntry,
+            modifier = Modifier.padding(padding),
         )
     }
 
-    // ModalBottomSheet вызывается вне Scaffold content для корректной обработки WindowInsets
+    // QuickAdd bottom sheet — вне Scaffold для корректной обработки WindowInsets
     QuickAddBottomSheet(
         uiState = quickAddUiState,
         onFoodSelected = quickAddViewModel::onFoodSelected,
@@ -87,6 +107,15 @@ fun HomeScreen(
             )
         },
     )
+
+    // EditEntry bottom sheet — вне Scaffold для корректной обработки WindowInsets
+    uiState.editingEntry?.let { entry ->
+        EditEntryBottomSheet(
+            entry = entry,
+            onSave = { newGrams -> viewModel.onUpdateEntryAmount(entry, newGrams) },
+            onDismiss = viewModel::onEditDismiss,
+        )
+    }
 }
 
 @Composable
@@ -96,74 +125,72 @@ private fun HomeScreenContent(
     onNavigateToSearch: (mealType: String, date: String) -> Unit,
     onDaySelected: (Int) -> Unit,
     onAddWaterGlass: () -> Unit,
+    onDeleteItem: (Long) -> Unit,
+    onEditItem: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(MaterialTheme.colorScheme.background),
     ) {
-        // Header с gradient (всегда показываем)
         HomeHeader(
             uiState = uiState,
-            onDaySelected = onDaySelected
+            onDaySelected = onDaySelected,
         )
 
-        // Loading состояние
         if (uiState.isLoading) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(32.dp),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 LoadingIndicator(text = "Загрузка...")
             }
             return
         }
 
-        // Error состояние
         if (uiState.error != null) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(32.dp),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     Text(
                         text = uiState.error,
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.error,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
                     )
                 }
             }
             return
         }
 
-        // Основной контент с прокруткой
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(rememberScrollState()),
         ) {
-            // Приёмы пищи
             MealsSection(
                 meals = uiState.meals,
                 onAddClick = onMealAddClick,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
+                onDeleteItem = onDeleteItem,
+                onEditItem = onEditItem,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp),
             )
 
-            // Трекер воды
             WaterTracker(
                 current = uiState.waterGlasses,
                 target = uiState.waterTarget,
                 onAddGlass = onAddWaterGlass,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 0.dp)
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 0.dp),
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -177,7 +204,7 @@ private fun HomeScreenContent(
 @Composable
 private fun HomeHeader(
     uiState: HomeUiState,
-    onDaySelected: (Int) -> Unit
+    onDaySelected: (Int) -> Unit,
 ) {
     val headerBrush = remember { Brush.verticalGradient(colors = listOf(Primary, PrimaryDark)) }
     val dateFormatter = remember { DateTimeFormatter.ofPattern("d MMMM", Locale("ru")) }
@@ -187,26 +214,25 @@ private fun HomeHeader(
             .fillMaxWidth()
             .background(brush = headerBrush)
             .clip(RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp))
-            .padding(horizontal = 20.dp, vertical = 16.dp)
+            .padding(horizontal = 20.dp, vertical = 16.dp),
     ) {
-        // Верхняя строка: Сегодня + дата | иконки
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Column {
                 Text(
                     text = "Сегодня",
                     fontSize = 13.sp,
                     color = Color.White.copy(alpha = 0.85f),
-                    fontWeight = FontWeight.Normal
+                    fontWeight = FontWeight.Normal,
                 )
                 Text(
                     text = uiState.selectedDate.format(dateFormatter),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    color = Color.White
+                    color = Color.White,
                 )
             }
 
@@ -218,91 +244,84 @@ private fun HomeHeader(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Выбор дня недели
         WeekDaySelector(
             selectedDayIndex = uiState.selectedDayIndex,
-            onDaySelected = onDaySelected
+            onDaySelected = onDaySelected,
         )
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Кольцевая диаграмма + макронутриенты
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(24.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            // Кольцевая диаграмма калорий
             CircularProgress(
                 value = uiState.consumedCalories,
                 max = uiState.targetCalories,
                 size = 130.dp,
                 strokeWidth = 10.dp,
                 color = Color.White,
-                backgroundColor = Color.White.copy(alpha = 0.2f)
+                backgroundColor = Color.White.copy(alpha = 0.2f),
             ) {
                 Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
                         text = uiState.consumedCalories.toInt().toString(),
                         style = MaterialTheme.typography.displayMedium,
-                        color = Color.White
+                        color = Color.White,
                     )
                     Text(
                         text = "из ${uiState.targetCalories.toInt()} ккал",
                         fontSize = 10.sp,
-                        color = Color.White.copy(alpha = 0.8f)
+                        color = Color.White.copy(alpha = 0.8f),
                     )
                     Text(
                         text = "Осталось ${(uiState.targetCalories - uiState.consumedCalories).toInt()}",
                         fontSize = 11.sp,
-                        color = Color.White.copy(alpha = 0.7f)
+                        color = Color.White.copy(alpha = 0.7f),
                     )
                 }
             }
 
-            // Макронутриенты (прогресс-бары)
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 MacroProgressBarWhite(
                     label = "Белки",
                     value = uiState.protein.consumed,
                     max = uiState.protein.target,
                     unit = "г",
-                    color = ProteinColor
+                    color = ProteinColor,
                 )
                 MacroProgressBarWhite(
                     label = "Жиры",
                     value = uiState.fat.consumed,
                     max = uiState.fat.target,
                     unit = "г",
-                    color = FatColor
+                    color = FatColor,
                 )
                 MacroProgressBarWhite(
                     label = "Углеводы",
                     value = uiState.carbs.consumed,
                     max = uiState.carbs.target,
                     unit = "г",
-                    color = CarbsColor
+                    color = CarbsColor,
                 )
                 MacroProgressBarWhite(
                     label = "Клетчатка",
                     value = uiState.fiber.consumed,
                     max = uiState.fiber.target,
                     unit = "г",
-                    color = FiberColor
+                    color = FiberColor,
                 )
             }
         }
     }
 }
 
-/**
- * Кнопка с иконкой в header
- */
 @Composable
 private fun HeaderIconButton(icon: androidx.compose.ui.graphics.vector.ImageVector) {
     Box(
@@ -311,31 +330,28 @@ private fun HeaderIconButton(icon: androidx.compose.ui.graphics.vector.ImageVect
             .clip(RoundedCornerShape(12.dp))
             .background(Color.White.copy(alpha = 0.2f))
             .clickable { /* TODO */ },
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Icon(
             imageVector = icon,
             contentDescription = null,
             tint = Color.White,
-            modifier = Modifier.size(16.dp)
+            modifier = Modifier.size(16.dp),
         )
     }
 }
 
-/**
- * Селектор дня недели (горизонтальный ряд)
- */
 @Composable
 private fun WeekDaySelector(
     selectedDayIndex: Int,
-    onDaySelected: (Int) -> Unit
+    onDaySelected: (Int) -> Unit,
 ) {
     val weekDays = listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс")
-    val startDay = 9 // Начальный день месяца
+    val startDay = 9
 
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         weekDays.forEachIndexed { index, day ->
             val onDayClick = remember(index) { { onDaySelected(index) } }
@@ -348,22 +364,22 @@ private fun WeekDaySelector(
                             Color.White.copy(alpha = 0.25f)
                         } else {
                             Color.Transparent
-                        }
+                        },
                     ).clickable(onClick = onDayClick)
                     .padding(vertical = 6.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
                     text = day,
                     fontSize = 10.sp,
-                    color = Color.White.copy(alpha = 0.7f)
+                    color = Color.White.copy(alpha = 0.7f),
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = (startDay + index).toString(),
                     fontSize = 15.sp,
                     fontWeight = if (selectedDayIndex == index) FontWeight.ExtraBold else FontWeight.Medium,
-                    color = Color.White
+                    color = Color.White,
                 )
             }
         }
@@ -371,31 +387,31 @@ private fun WeekDaySelector(
 }
 
 /**
- * Секция с приёмами пищи
+ * Секция с карточками приёмов пищи
  */
 @Composable
 private fun MealsSection(
     meals: List<MealData>,
     onAddClick: (MealData) -> Unit,
-    modifier: Modifier = Modifier
+    onDeleteItem: (Long) -> Unit,
+    onEditItem: (Long) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
-        // Заголовок секции
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = "Приёмы пищи",
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.ExtraBold
+                fontWeight = FontWeight.ExtraBold,
             )
         }
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Карточки приёмов пищи
         meals.forEach { meal ->
             val onMealAddClick = remember(meal) { { onAddClick(meal) } }
             MealCard(
@@ -404,7 +420,9 @@ private fun MealsSection(
                 time = meal.time,
                 totalCalories = meal.totalCalories,
                 foodItems = meal.foodItems,
-                onAddClick = onMealAddClick
+                onAddClick = onMealAddClick,
+                onDeleteItem = onDeleteItem,
+                onEditItem = onEditItem,
             )
             Spacer(modifier = Modifier.height(10.dp))
         }
@@ -419,49 +437,49 @@ private fun WaterTracker(
     current: Int,
     target: Int,
     onAddGlass: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+            containerColor = MaterialTheme.colorScheme.surface,
+        ),
     ) {
         val waterBrush = remember {
             Brush.horizontalGradient(
                 colors = listOf(
                     Secondary.copy(alpha = 0.15f),
-                    Secondary.copy(alpha = 0.08f)
-                )
+                    Secondary.copy(alpha = 0.08f),
+                ),
             )
         }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(brush = waterBrush)
-                .padding(14.dp)
+                .padding(14.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(text = "💧", fontSize = 24.sp)
                     Column {
                         Text(
                             text = "Вода",
                             style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
                         )
                         Text(
                             text = "$current из $target стаканов",
                             fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
@@ -469,14 +487,14 @@ private fun WaterTracker(
                 Button(
                     onClick = onAddGlass,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Secondary
+                        containerColor = Secondary,
                     ),
-                    shape = RoundedCornerShape(10.dp)
+                    shape = RoundedCornerShape(10.dp),
                 ) {
                     Text(
                         text = "+ Стакан",
                         fontSize = 13.sp,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
                     )
                 }
             }
@@ -507,9 +525,9 @@ private fun HomeScreenPreview() {
                         time = "08:00",
                         totalCalories = 303,
                         foodItems = listOf(
-                            FoodItemData("Овсяная каша", "200г", 150),
-                            FoodItemData("Банан", "1 шт", 89)
-                        )
+                            FoodItemData("Овсяная каша", "200г", 150, entryId = 1L),
+                            FoodItemData("Банан", "1 шт", 89, entryId = 2L),
+                        ),
                     ),
                     MealData(
                         id = 2,
@@ -519,18 +537,20 @@ private fun HomeScreenPreview() {
                         time = "13:00",
                         totalCalories = 381,
                         foodItems = listOf(
-                            FoodItemData("Куриная грудка", "150г", 165)
-                        )
-                    )
+                            FoodItemData("Куриная грудка", "150г", 165, entryId = 3L),
+                        ),
+                    ),
                 ),
                 selectedDayIndex = 3,
                 waterGlasses = 4,
-                waterTarget = 8
+                waterTarget = 8,
             ),
             onMealAddClick = {},
             onNavigateToSearch = { _, _ -> },
             onDaySelected = {},
-            onAddWaterGlass = {}
+            onAddWaterGlass = {},
+            onDeleteItem = {},
+            onEditItem = {},
         )
     }
 }
@@ -550,12 +570,14 @@ private fun HomeScreenPreviewDark() {
                 meals = emptyList(),
                 selectedDayIndex = 0,
                 waterGlasses = 6,
-                waterTarget = 8
+                waterTarget = 8,
             ),
             onMealAddClick = {},
             onNavigateToSearch = { _, _ -> },
             onDaySelected = {},
-            onAddWaterGlass = {}
+            onAddWaterGlass = {},
+            onDeleteItem = {},
+            onEditItem = {},
         )
     }
 }
