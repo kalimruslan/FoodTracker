@@ -15,4 +15,10 @@ kotlin {
 dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation("javax.inject:javax.inject:1")
+
+    // Testing
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.turbine)
+    testImplementation(libs.kotlinx.coroutines.test)
 }

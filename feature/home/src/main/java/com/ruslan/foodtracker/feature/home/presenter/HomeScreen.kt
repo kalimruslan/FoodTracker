@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -38,26 +39,64 @@ import java.util.Locale
 fun HomeScreen(
     onNavigateToSearch: (mealType: String, date: String) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: HomeViewModel = hiltViewModel(),
+    quickAddViewModel: QuickAddViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val quickAddUiState by quickAddViewModel.uiState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
-    HomeScreenContent(
-        uiState = uiState,
-        onNavigateToSearch = onNavigateToSearch,
-        onDaySelected = viewModel::onDaySelected,
-        onAddWaterGlass = viewModel::onAddWaterGlass,
-        modifier = modifier
+    LaunchedEffect(quickAddUiState.isSaved) {
+        if (quickAddUiState.isSaved) {
+            snackbarHostState.showSnackbar("Добавлено в дневник")
+            quickAddViewModel.onSavedHandled()
+        }
+    }
+
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+    ) { padding ->
+        HomeScreenContent(
+            uiState = uiState,
+            onMealAddClick = { meal ->
+                quickAddViewModel.open(meal.mealType, uiState.selectedDate)
+            },
+            onNavigateToSearch = onNavigateToSearch,
+            onDaySelected = viewModel::onDaySelected,
+            onAddWaterGlass = viewModel::onAddWaterGlass,
+            modifier = modifier.padding(padding),
+        )
+    }
+
+    // ModalBottomSheet вызывается вне Scaffold content для корректной обработки WindowInsets
+    QuickAddBottomSheet(
+        uiState = quickAddUiState,
+        onFoodSelected = quickAddViewModel::onFoodSelected,
+        onRecentEntrySelected = quickAddViewModel::onRecentEntrySelected,
+        onAmountChanged = quickAddViewModel::onAmountChanged,
+        onMealTypeChanged = quickAddViewModel::onMealTypeChanged,
+        onTabSelected = quickAddViewModel::onTabSelected,
+        onBackToSelection = quickAddViewModel::onBackToSelection,
+        onSave = quickAddViewModel::saveEntry,
+        onDismiss = quickAddViewModel::close,
+        onNavigateToSearch = {
+            quickAddViewModel.close()
+            onNavigateToSearch(
+                quickAddUiState.selectedMealType.name,
+                uiState.selectedDate.toString(),
+            )
+        },
     )
 }
 
 @Composable
 private fun HomeScreenContent(
     uiState: HomeUiState,
+    onMealAddClick: (MealData) -> Unit,
     onNavigateToSearch: (mealType: String, date: String) -> Unit,
     onDaySelected: (Int) -> Unit,
     onAddWaterGlass: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier
@@ -115,9 +154,7 @@ private fun HomeScreenContent(
             // Приёмы пищи
             MealsSection(
                 meals = uiState.meals,
-                onAddClick = { meal ->
-                    onNavigateToSearch(meal.mealType.name, uiState.selectedDate.toString())
-                },
+                onAddClick = onMealAddClick,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
             )
 
@@ -490,6 +527,7 @@ private fun HomeScreenPreview() {
                 waterGlasses = 4,
                 waterTarget = 8
             ),
+            onMealAddClick = {},
             onNavigateToSearch = { _, _ -> },
             onDaySelected = {},
             onAddWaterGlass = {}
@@ -514,6 +552,7 @@ private fun HomeScreenPreviewDark() {
                 waterGlasses = 6,
                 waterTarget = 8
             ),
+            onMealAddClick = {},
             onNavigateToSearch = { _, _ -> },
             onDaySelected = {},
             onAddWaterGlass = {}
