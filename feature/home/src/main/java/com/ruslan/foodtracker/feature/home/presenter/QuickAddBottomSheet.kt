@@ -144,12 +144,6 @@ private fun FoodSelectionStep(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Список продуктов
-        val listContent = when (uiState.selectedTab) {
-            QuickAddTab.FAVORITES -> if (uiState.favoriteFoods.isEmpty()) null else uiState.favoriteFoods
-            QuickAddTab.RECENT -> null // handled separately
-        }
-
         when (uiState.selectedTab) {
             QuickAddTab.FAVORITES -> {
                 if (uiState.favoriteFoods.isEmpty()) {

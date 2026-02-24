@@ -54,7 +54,7 @@ fun FoodEntryEntity.toDomain(): FoodEntry =
         carbs = carbs,
         fat = fat,
         timestamp = timestamp,
-        mealType = MealType.valueOf(mealType)
+        mealType = MealType.entries.find { it.name == mealType } ?: MealType.BREAKFAST
     )
 
 fun FoodEntry.toEntity(): FoodEntryEntity =

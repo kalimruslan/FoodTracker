@@ -148,7 +148,7 @@ class QuickAddViewModel
             val food = state.selectedFood ?: return
             val grams = state.amountText.toDoubleOrNull() ?: return
             if (grams <= 0) {
-                _uiState.value = state.copy(error = "Введите корректное количество")
+                _uiState.update { it.copy(error = "Введите корректное количество") }
                 return
             }
             val servingSize = food.servingSize.coerceAtLeast(1.0)
@@ -168,20 +168,12 @@ class QuickAddViewModel
             )
 
             viewModelScope.launch {
-                _uiState.value = state.copy(isLoading = true, error = null)
+                _uiState.update { it.copy(isLoading = true, error = null) }
                 val result = insertFoodEntryUseCase(entry)
-                result.doActionIfSuccess {
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        isSaved = true,
-                        isVisible = false,
-                    )
-                }
-                if (result is NetworkResult.Error) {
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        error = "Ошибка сохранения",
-                    )
+                if (result is NetworkResult.Success) {
+                    _uiState.update { it.copy(isLoading = false, isSaved = true, isVisible = false) }
+                } else if (result is NetworkResult.Error) {
+                    _uiState.update { it.copy(isLoading = false, error = "Ошибка сохранения") }
                 }
             }
         }
