@@ -15,6 +15,25 @@ interface FoodEntryDao {
     @Query("SELECT * FROM food_entries WHERE id = :id")
     suspend fun getEntryById(id: Long): FoodEntryEntity?
 
+    /**
+     * Последние уникальные записи по foodId, отсортированные по убыванию MAX(timestamp) группы.
+     * INNER JOIN гарантирует детерминированный выбор ровно одной записи на foodId — самой свежей.
+     */
+    @Query(
+        """
+        SELECT fe.* FROM food_entries fe
+        INNER JOIN (
+            SELECT foodId, MAX(timestamp) AS maxTs
+            FROM food_entries
+            GROUP BY foodId
+            ORDER BY maxTs DESC
+            LIMIT :limit
+        ) latest ON fe.foodId = latest.foodId AND fe.timestamp = latest.maxTs
+        ORDER BY latest.maxTs DESC
+    """
+    )
+    fun getRecentEntries(limit: Int): Flow<List<FoodEntryEntity>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertEntry(entry: FoodEntryEntity): Long
 
