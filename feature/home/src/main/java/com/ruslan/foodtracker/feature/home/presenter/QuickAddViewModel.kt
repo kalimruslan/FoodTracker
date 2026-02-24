@@ -6,7 +6,6 @@ import com.ruslan.foodtracker.domain.model.Food
 import com.ruslan.foodtracker.domain.model.FoodEntry
 import com.ruslan.foodtracker.domain.model.MealType
 import com.ruslan.foodtracker.domain.model.NetworkResult
-import com.ruslan.foodtracker.domain.model.doActionIfSuccess
 import com.ruslan.foodtracker.domain.usecase.entry.GetRecentFoodEntriesUseCase
 import com.ruslan.foodtracker.domain.usecase.entry.InsertFoodEntryUseCase
 import com.ruslan.foodtracker.domain.usecase.food.GetFavoriteFoodsUseCase
@@ -23,7 +22,9 @@ import java.time.LocalTime
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
-enum class QuickAddTab(val label: String) {
+enum class QuickAddTab(
+    val label: String
+) {
     FAVORITES("Избранное"),
     RECENT("Недавние"),
 }
@@ -197,10 +198,12 @@ class QuickAddViewModel
                 getRecentFoodEntriesUseCase(limit = 20).collect { result ->
                     when (result) {
                         is NetworkResult.Loading -> _uiState.update { it.copy(isLoadingRecent = true) }
-                        is NetworkResult.Success -> _uiState.update { it.copy(
-                            recentEntries = result.data,
-                            isLoadingRecent = false,
-                        ) }
+                        is NetworkResult.Success -> _uiState.update {
+                            it.copy(
+                                recentEntries = result.data,
+                                isLoadingRecent = false,
+                            )
+                        }
                         is NetworkResult.Error -> _uiState.update { it.copy(isLoadingRecent = false) }
                         else -> Unit
                     }

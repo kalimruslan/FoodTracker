@@ -18,6 +18,7 @@ import com.ruslan.foodtracker.core.ui.theme.FoodTrackerTheme
 import com.ruslan.foodtracker.domain.model.FoodEntry
 import com.ruslan.foodtracker.domain.model.MealType
 import java.time.LocalDateTime
+import java.util.Locale
 import kotlin.math.roundToInt
 
 /**
@@ -69,19 +70,56 @@ private fun EditEntryContent(
     val newGrams = amountText.toDoubleOrNull() ?: 0.0
     val canRecalculate = entry.amountGrams > 0 && newGrams > 0
     val ratio = if (canRecalculate) newGrams / entry.amountGrams else 1.0
-
     val previewCalories = if (canRecalculate) (entry.calories * ratio).roundToInt() else entry.calories
     val previewProtein = if (canRecalculate) entry.protein * ratio else entry.protein
     val previewCarbs = if (canRecalculate) entry.carbs * ratio else entry.carbs
     val previewFat = if (canRecalculate) entry.fat * ratio else entry.fat
-
     val isSaveEnabled = newGrams > 0
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-    ) {
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+        EditEntryHeader(foodName = entry.foodName, onDismiss = onDismiss)
+        Spacer(modifier = Modifier.height(16.dp))
+        OutlinedTextField(
+            value = amountText,
+            onValueChange = { text ->
+                if (text.all { it.isDigit() || it == '.' || it == ',' }) {
+                    amountText = text.replace(',', '.')
+                }
+            },
+            label = { Text("Количество") },
+            suffix = { Text("г") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+        CaloriePreview(
+            calories = previewCalories,
+            protein = previewProtein,
+            fat = previewFat,
+            carbs = previewCarbs,
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+        Button(
+            onClick = { onSave(newGrams) },
+            enabled = isSaveEnabled,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(
+                text = "Сохранить",
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+    }
+}
+
+@Composable
+private fun EditEntryHeader(
+    foodName: String,
+    onDismiss: () -> Unit,
+) {
+    Column {
         // Заголовок с кнопкой закрытия
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -100,78 +138,48 @@ private fun EditEntryContent(
                 )
             }
         }
-
         Spacer(modifier = Modifier.height(4.dp))
-
         // Название продукта
         Text(
-            text = entry.foodName,
+            text = foodName,
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+    }
+}
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Поле ввода граммов
-        OutlinedTextField(
-            value = amountText,
-            onValueChange = { text ->
-                if (text.all { it.isDigit() || it == '.' || it == ',' }) {
-                    amountText = text.replace(',', '.')
-                }
-            },
-            label = { Text("Количество") },
-            suffix = { Text("г") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
+@Composable
+private fun CaloriePreview(
+    calories: Int,
+    protein: Double,
+    fat: Double,
+    carbs: Double,
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            text = calories.toString(),
+            fontSize = 48.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = MaterialTheme.colorScheme.primary,
         )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Live preview калорий
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(
-                text = previewCalories.toString(),
-                fontSize = 48.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = MaterialTheme.colorScheme.primary,
-            )
-            Text(
-                text = "ккал",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Б ${String.format("%.1f", previewProtein)}г  " +
-                    "Ж ${String.format("%.1f", previewFat)}г  " +
-                    "У ${String.format("%.1f", previewCarbs)}г",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-            )
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Кнопка "Сохранить"
-        Button(
-            onClick = { onSave(newGrams) },
-            enabled = isSaveEnabled,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(
-                text = "Сохранить",
-                fontWeight = FontWeight.SemiBold,
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "ккал",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = "Б ${String.format(Locale.ROOT, "%.1f", protein)}г  " +
+                "Ж ${String.format(Locale.ROOT, "%.1f", fat)}г  " +
+                "У ${String.format(Locale.ROOT, "%.1f", carbs)}г",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
     }
 }
 

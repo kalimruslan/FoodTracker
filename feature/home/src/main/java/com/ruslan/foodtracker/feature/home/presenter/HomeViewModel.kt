@@ -109,7 +109,10 @@ class HomeViewModel
          * Обновляет граммовку записи и пересчитывает макросы через коэффициент.
          * Защита от деления на ноль: если [entry.amountGrams] <= 0 — операция отменяется.
          */
-        fun onUpdateEntryAmount(entry: FoodEntry, newAmountGrams: Double) {
+        fun onUpdateEntryAmount(
+            entry: FoodEntry,
+            newAmountGrams: Double
+        ) {
             if (newAmountGrams <= 0) return
             if (entry.amountGrams <= 0) {
                 // Нельзя пересчитать макросы без исходного значения граммов

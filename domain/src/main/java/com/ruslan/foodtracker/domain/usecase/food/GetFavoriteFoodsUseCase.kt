@@ -11,6 +11,5 @@ class GetFavoriteFoodsUseCase
     constructor(
         private val repository: FoodRepository
     ) {
-        operator fun invoke(): Flow<NetworkResult<List<Food>>> =
-            repository.getFavoriteFoods()
+        operator fun invoke(): Flow<NetworkResult<List<Food>>> = repository.getFavoriteFoods()
     }

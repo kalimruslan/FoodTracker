@@ -71,6 +71,7 @@ fun HomeScreen(
     }
 
     Scaffold(
+        modifier = modifier,
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         HomeScreenContent(
@@ -83,7 +84,7 @@ fun HomeScreen(
             onAddWaterGlass = viewModel::onAddWaterGlass,
             onDeleteItem = viewModel::onDeleteEntry,
             onEditItem = viewModel::onEditEntry,
-            modifier = modifier.padding(padding),
+            modifier = Modifier.padding(padding),
         )
     }
 

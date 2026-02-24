@@ -14,6 +14,5 @@ class GetRecentFoodEntriesUseCase
         /**
          * @param limit Максимальное количество продуктов (default: 20)
          */
-        operator fun invoke(limit: Int = 20): Flow<NetworkResult<List<FoodEntry>>> =
-            repository.getRecentEntries(limit)
+        operator fun invoke(limit: Int = 20): Flow<NetworkResult<List<FoodEntry>>> = repository.getRecentEntries(limit)
     }
