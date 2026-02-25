@@ -41,8 +41,9 @@ class HomeViewModel
 
         private var loadJob: Job? = null
 
-        // Кэш хранится в ViewModel, а не в UiState — исключает shallow copy при каждом copy()
-        // и устраняет race condition при записи в Flow.collect
+        // Кэш хранится в ViewModel, а не в UiState — исключает shallow copy при каждом copy().
+        // Доступ безопасен без синхронизации: viewModelScope использует Dispatchers.Main,
+        // который однопоточен — все корутины выполняются последовательно на главном потоке.
         private val entriesCache = mutableMapOf<LocalDate, List<FoodEntry>>()
 
         init {
@@ -50,7 +51,16 @@ class HomeViewModel
         }
 
         fun onDateSelected(date: LocalDate) {
-            _uiState.value = _uiState.value.copy(selectedDate = date)
+            val today = LocalDate.now()
+            val newWeekStart = DateTimeUtils.weekStart(date)
+            val todayWeekStart = DateTimeUtils.weekStart(today)
+            _uiState.value = _uiState.value.copy(
+                selectedDate = date,
+                selectedDayIndex = date.dayOfWeek.value - 1,
+                currentWeekStart = newWeekStart,
+                showTodayButton = newWeekStart != todayWeekStart,
+                canGoNextWeek = newWeekStart < todayWeekStart,
+            )
             loadEntriesForSelectedDate()
         }
 

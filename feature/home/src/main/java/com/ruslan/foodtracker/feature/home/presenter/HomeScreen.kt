@@ -50,6 +50,12 @@ fun HomeScreen(
     val quickAddUiState by quickAddViewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
+    // W-2: стабилизируем лямбду через remember — исключает рекомпозицию HomeScreenContent
+    // при каждом изменении uiState (selectedDate меняется при смене дня)
+    val onMealAddClick = remember(uiState.selectedDate) {
+        { meal: MealData -> quickAddViewModel.open(meal.mealType, uiState.selectedDate) }
+    }
+
     // Snackbar "Добавлено в дневник" после QuickAdd
     LaunchedEffect(quickAddUiState.isSaved) {
         if (quickAddUiState.isSaved) {
@@ -80,9 +86,7 @@ fun HomeScreen(
     ) { padding ->
         HomeScreenContent(
             uiState = uiState,
-            onMealAddClick = { meal ->
-                quickAddViewModel.open(meal.mealType, uiState.selectedDate)
-            },
+            onMealAddClick = onMealAddClick,
             onNavigateToSearch = onNavigateToSearch,
             onDaySelected = viewModel::onDaySelected,
             onPreviousWeek = viewModel::onPreviousWeek,
@@ -224,6 +228,8 @@ private fun HomeHeader(
 ) {
     val headerBrush = remember { Brush.verticalGradient(colors = listOf(Primary, PrimaryDark)) }
     val dateFormatter = remember { DateTimeFormatter.ofPattern("d MMMM", Locale("ru")) }
+    // W-3: LocalDate.now() один раз за сессию отображения хедера, не на каждой рекомпозиции
+    val today = remember { LocalDate.now() }
 
     Column(
         modifier = Modifier
@@ -238,10 +244,11 @@ private fun HomeHeader(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column {
-                val headerLabel = if (uiState.selectedDate == LocalDate.now()) {
+                // W-4: переиспользуем dateFormatter вместо нового экземпляра
+                val headerLabel = if (uiState.selectedDate == today) {
                     "Сегодня"
                 } else {
-                    uiState.selectedDate.format(DateTimeFormatter.ofPattern("d MMMM", Locale("ru")))
+                    uiState.selectedDate.format(dateFormatter)
                 }
                 Text(
                     text = headerLabel,
@@ -435,7 +442,8 @@ private fun WeekDaySelector(
     onDaySelected: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val today = LocalDate.now()
+    // W-3: remember исключает системный вызов на каждой рекомпозиции
+    val today = remember { LocalDate.now() }
     val weekDayNames = listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс")
     val weekDates = DateTimeUtils.weekDates(currentWeekStart)
 
