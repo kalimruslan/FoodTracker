@@ -50,6 +50,21 @@ class FoodEntryRepositoryImpl
                     )
                 }
 
+        override fun getRecentEntries(limit: Int): Flow<NetworkResult<List<FoodEntry>>> =
+            foodEntryDao
+                .getRecentEntries(limit)
+                .map<List<FoodEntryEntity>, NetworkResult<List<FoodEntry>>> { entities ->
+                    NetworkResult.Success(entities.map { it.toDomain() })
+                }.onStart { emit(NetworkResult.Loading) }
+                .catch { e ->
+                    emit(
+                        NetworkResult.Error(
+                            error = DomainError.Database.FetchFailed,
+                            exception = e
+                        )
+                    )
+                }
+
         override suspend fun getEntryById(id: Long): NetworkResult<FoodEntry> =
             try {
                 val entry = foodEntryDao.getEntryById(id)?.toDomain()
