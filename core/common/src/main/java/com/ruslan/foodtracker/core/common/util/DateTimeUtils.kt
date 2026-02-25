@@ -5,7 +5,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
-import java.util.Locale
 
 object DateTimeUtils {
     private val dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
@@ -36,15 +35,22 @@ object DateTimeUtils {
      * Если начало и конец в одном месяце — «22 – 28 фев».
      * Если в разных месяцах — «28 янв – 3 фев».
      */
+    private val shortMonthNames = arrayOf(
+        "янв", "фев", "мар", "апр", "май", "июн",
+        "июл", "авг", "сен", "окт", "ноя", "дек"
+    )
+
     fun formatWeekRange(weekStartDate: LocalDate): String {
         val start = weekStart(weekStartDate)
         val end = weekEnd(weekStartDate)
-        val monthFormatter = DateTimeFormatter.ofPattern("d MMM", Locale("ru"))
         val dayOnlyFormatter = DateTimeFormatter.ofPattern("d")
+
+        fun monthAbbr(date: LocalDate): String = shortMonthNames[date.monthValue - 1]
+
         return if (start.month == end.month) {
-            "${start.format(dayOnlyFormatter)} – ${end.format(monthFormatter)}"
+            "${start.format(dayOnlyFormatter)} – ${end.format(dayOnlyFormatter)} ${monthAbbr(end)}"
         } else {
-            "${start.format(monthFormatter)} – ${end.format(monthFormatter)}"
+            "${start.format(dayOnlyFormatter)} ${monthAbbr(start)} – ${end.format(dayOnlyFormatter)} ${monthAbbr(end)}"
         }
     }
 

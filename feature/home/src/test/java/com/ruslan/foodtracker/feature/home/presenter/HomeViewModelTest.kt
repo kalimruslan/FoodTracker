@@ -10,6 +10,7 @@ import com.ruslan.foodtracker.domain.usecase.entry.GetEntriesByDateUseCase
 import com.ruslan.foodtracker.domain.usecase.entry.InsertFoodEntryUseCase
 import com.ruslan.foodtracker.domain.usecase.entry.UpdateFoodEntryUseCase
 import io.mockk.MockKAnnotations
+import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -671,7 +672,8 @@ class HomeViewModelTest {
             advanceUntilIdle()
 
             val dateWednesday = viewModel.uiState.value.currentWeekStart.plusDays(2)
-            // Clear invocations count before the repeated call
+            // Reset recorded call history but keep stubs intact
+            clearMocks(getEntriesByDateUseCase, answers = false)
             every { getEntriesByDateUseCase(any()) } returns flowOf(NetworkResult.Success(emptyList()))
 
             viewModel.onDaySelected(2) // return to cached Wednesday
