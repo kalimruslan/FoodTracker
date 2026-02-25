@@ -682,29 +682,32 @@ class HomeViewModelTest {
         }
 
     @Test
-    fun `TC-17 after onDeleteEntry cache for selectedDate is invalidated`() =
+    fun `TC-17 after onDeleteEntry cache is invalidated and data is reloaded`() =
         runTest {
             initWithEntries(listOf(testEntry))
             advanceUntilIdle()
 
             coEvery { deleteFoodEntryUseCase(testEntry) } returns NetworkResult.Success(Unit)
+            // После инвалидации кэша ViewModel снова запросит данные из репозитория
+            every { getEntriesByDateUseCase(any()) } returns flowOf(NetworkResult.Success(emptyList()))
 
             viewModel.onDeleteEntry(testEntry.id)
             advanceUntilIdle()
 
-            // After delete, cache for selected date should be cleared, triggering reload
+            // Второй вызов означает, что кэш был инвалидирован и произошла перезагрузка
             val selectedDate = viewModel.uiState.value.selectedDate
-            assertFalse(viewModel.uiState.value.entriesCache.containsKey(selectedDate))
+            verify(atLeast = 2) { getEntriesByDateUseCase(selectedDate) }
         }
 
     @Test
-    fun `TC-18 after onUndoDelete cache for selectedDate is invalidated`() =
+    fun `TC-18 after onUndoDelete cache is invalidated and data is reloaded`() =
         runTest {
             initWithEntries(listOf(testEntry))
             advanceUntilIdle()
 
             coEvery { deleteFoodEntryUseCase(testEntry) } returns NetworkResult.Success(Unit)
             coEvery { insertFoodEntryUseCase(any()) } returns NetworkResult.Success(5L)
+            every { getEntriesByDateUseCase(any()) } returns flowOf(NetworkResult.Success(emptyList()))
 
             viewModel.onDeleteEntry(testEntry.id)
             advanceUntilIdle()
@@ -712,23 +715,25 @@ class HomeViewModelTest {
             viewModel.onUndoDelete()
             advanceUntilIdle()
 
-            // After undo, cache for selected date should be cleared, triggering reload
+            // Минимум 3 вызова: init + после delete + после undo
             val selectedDate = viewModel.uiState.value.selectedDate
-            assertFalse(viewModel.uiState.value.entriesCache.containsKey(selectedDate))
+            verify(atLeast = 3) { getEntriesByDateUseCase(selectedDate) }
         }
 
     @Test
-    fun `TC-19 after onUpdateEntryAmount cache for selectedDate is invalidated`() =
+    fun `TC-19 after onUpdateEntryAmount cache is invalidated and data is reloaded`() =
         runTest {
             initWithEntries(listOf(testEntry))
             advanceUntilIdle()
 
             coEvery { updateFoodEntryUseCase(any()) } returns NetworkResult.Success(Unit)
+            every { getEntriesByDateUseCase(any()) } returns flowOf(NetworkResult.Success(emptyList()))
 
             viewModel.onUpdateEntryAmount(testEntry, 200.0)
             advanceUntilIdle()
 
+            // Второй вызов означает, что кэш был инвалидирован и произошла перезагрузка
             val selectedDate = viewModel.uiState.value.selectedDate
-            assertFalse(viewModel.uiState.value.entriesCache.containsKey(selectedDate))
+            verify(atLeast = 2) { getEntriesByDateUseCase(selectedDate) }
         }
 }

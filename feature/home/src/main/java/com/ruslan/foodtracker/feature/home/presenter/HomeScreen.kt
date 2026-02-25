@@ -268,8 +268,7 @@ private fun HomeHeader(
         WeekNavigationRow(
             weekRange = DateTimeUtils.formatWeekRange(uiState.currentWeekStart),
             showTodayButton = uiState.showTodayButton,
-            canGoNext = DateTimeUtils.weekStart(uiState.currentWeekStart.plusWeeks(1)) <=
-                DateTimeUtils.weekStart(LocalDate.now()),
+            canGoNext = uiState.canGoNextWeek,
             onPreviousWeek = onPreviousWeek,
             onNextWeek = onNextWeek,
             onTodayClicked = onTodayClicked,

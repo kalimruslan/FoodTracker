@@ -41,6 +41,10 @@ class HomeViewModel
 
         private var loadJob: Job? = null
 
+        // Кэш хранится в ViewModel, а не в UiState — исключает shallow copy при каждом copy()
+        // и устраняет race condition при записи в Flow.collect
+        private val entriesCache = mutableMapOf<LocalDate, List<FoodEntry>>()
+
         init {
             loadEntriesForSelectedDate()
         }
@@ -83,6 +87,7 @@ class HomeViewModel
                 selectedDate = clampedDate,
                 selectedDayIndex = clampedIndex,
                 showTodayButton = newWeekStart != DateTimeUtils.weekStart(today),
+                canGoNextWeek = true, // из прошлой недели всегда можно идти вперёд
             )
             loadEntriesForSelectedDate()
         }
@@ -102,12 +107,14 @@ class HomeViewModel
             val targetDate = newWeekStart.plusDays(_uiState.value.selectedDayIndex.toLong())
             val clampedDate = if (targetDate.isAfter(today)) today else targetDate
             val clampedIndex = clampedDate.dayOfWeek.value - 1
+            val isNowCurrentWeek = newWeekStart == todayWeekStart
 
             _uiState.value = _uiState.value.copy(
                 currentWeekStart = newWeekStart,
                 selectedDate = clampedDate,
                 selectedDayIndex = clampedIndex,
-                showTodayButton = newWeekStart != todayWeekStart,
+                showTodayButton = !isNowCurrentWeek,
+                canGoNextWeek = !isNowCurrentWeek, // нельзя идти вперёд с текущей недели
             )
             loadEntriesForSelectedDate()
         }
@@ -123,6 +130,7 @@ class HomeViewModel
                 selectedDate = today,
                 selectedDayIndex = today.dayOfWeek.value - 1,
                 showTodayButton = false,
+                canGoNextWeek = false, // на текущей неделе нельзя идти вперёд
             )
             loadEntriesForSelectedDate()
         }
@@ -219,8 +227,8 @@ class HomeViewModel
             loadJob = viewModelScope.launch {
                 val selectedDate = _uiState.value.selectedDate
 
-                // Проверяем кэш: если данные есть — рендерим сразу без Loading
-                val cached = _uiState.value.entriesCache[selectedDate]
+                // Проверяем приватный кэш: если данные есть — рендерим сразу без Loading
+                val cached = entriesCache[selectedDate]
                 if (cached != null) {
                     applyEntriesToState(cached)
                     return@launch
@@ -232,9 +240,8 @@ class HomeViewModel
                     }
 
                     result.doActionIfSuccess { entries ->
-                        // Сохраняем в кэш
-                        val updatedCache = _uiState.value.entriesCache + (selectedDate to entries)
-                        _uiState.value = _uiState.value.copy(entriesCache = updatedCache)
+                        // Сохраняем в приватный кэш — нет race condition и лишних copy()
+                        entriesCache[selectedDate] = entries
                         applyEntriesToState(entries)
                     }
 
@@ -283,9 +290,7 @@ class HomeViewModel
         }
 
         private fun invalidateCacheForDate(date: LocalDate) {
-            _uiState.value = _uiState.value.copy(
-                entriesCache = _uiState.value.entriesCache - date,
-            )
+            entriesCache.remove(date)
         }
 
         private fun createMealData(
@@ -349,15 +354,16 @@ data class HomeUiState(
      */
     val currentWeekStart: LocalDate = DateTimeUtils.weekStart(LocalDate.now()),
     /**
-     * Кэш загруженных записей: ключ — дата, значение — список FoodEntry.
-     * Позволяет не ходить в БД при повторном выборе ранее загруженной даты.
-     */
-    val entriesCache: Map<LocalDate, List<FoodEntry>> = emptyMap(),
-    /**
      * Показывать ли кнопку «Сегодня».
      * true, если отображаемая неделя != текущая неделя.
      */
     val showTodayButton: Boolean = false,
+    /**
+     * Можно ли перейти на следующую неделю.
+     * false если уже на текущей неделе (нет будущих недель).
+     * Вычисляется в ViewModel — не в Composable, избегая LocalDate.now() при рекомпозиции.
+     */
+    val canGoNextWeek: Boolean = false,
 )
 
 /**
