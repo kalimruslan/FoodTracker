@@ -7,6 +7,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.*
@@ -26,8 +28,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.ruslan.foodtracker.core.common.util.DateTimeUtils
 import com.ruslan.foodtracker.core.ui.components.*
 import com.ruslan.foodtracker.core.ui.theme.*
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -45,6 +49,12 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsState()
     val quickAddUiState by quickAddViewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+
+    // W-2: стабилизируем лямбду через remember — исключает рекомпозицию HomeScreenContent
+    // при каждом изменении uiState (selectedDate меняется при смене дня)
+    val onMealAddClick = remember(uiState.selectedDate) {
+        { meal: MealData -> quickAddViewModel.open(meal.mealType, uiState.selectedDate) }
+    }
 
     // Snackbar "Добавлено в дневник" после QuickAdd
     LaunchedEffect(quickAddUiState.isSaved) {
@@ -76,11 +86,12 @@ fun HomeScreen(
     ) { padding ->
         HomeScreenContent(
             uiState = uiState,
-            onMealAddClick = { meal ->
-                quickAddViewModel.open(meal.mealType, uiState.selectedDate)
-            },
+            onMealAddClick = onMealAddClick,
             onNavigateToSearch = onNavigateToSearch,
             onDaySelected = viewModel::onDaySelected,
+            onPreviousWeek = viewModel::onPreviousWeek,
+            onNextWeek = viewModel::onNextWeek,
+            onTodayClicked = viewModel::onTodayClicked,
             onAddWaterGlass = viewModel::onAddWaterGlass,
             onDeleteItem = viewModel::onDeleteEntry,
             onEditItem = viewModel::onEditEntry,
@@ -124,6 +135,9 @@ private fun HomeScreenContent(
     onMealAddClick: (MealData) -> Unit,
     onNavigateToSearch: (mealType: String, date: String) -> Unit,
     onDaySelected: (Int) -> Unit,
+    onPreviousWeek: () -> Unit,
+    onNextWeek: () -> Unit,
+    onTodayClicked: () -> Unit,
     onAddWaterGlass: () -> Unit,
     onDeleteItem: (Long) -> Unit,
     onEditItem: (Long) -> Unit,
@@ -137,6 +151,9 @@ private fun HomeScreenContent(
         HomeHeader(
             uiState = uiState,
             onDaySelected = onDaySelected,
+            onPreviousWeek = onPreviousWeek,
+            onNextWeek = onNextWeek,
+            onTodayClicked = onTodayClicked,
         )
 
         if (uiState.isLoading) {
@@ -205,9 +222,14 @@ private fun HomeScreenContent(
 private fun HomeHeader(
     uiState: HomeUiState,
     onDaySelected: (Int) -> Unit,
+    onPreviousWeek: () -> Unit,
+    onNextWeek: () -> Unit,
+    onTodayClicked: () -> Unit,
 ) {
     val headerBrush = remember { Brush.verticalGradient(colors = listOf(Primary, PrimaryDark)) }
     val dateFormatter = remember { DateTimeFormatter.ofPattern("d MMMM", Locale("ru")) }
+    // W-3: LocalDate.now() один раз за сессию отображения хедера, не на каждой рекомпозиции
+    val today = remember { LocalDate.now() }
 
     Column(
         modifier = Modifier
@@ -222,8 +244,14 @@ private fun HomeHeader(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column {
+                // W-4: переиспользуем dateFormatter вместо нового экземпляра
+                val headerLabel = if (uiState.selectedDate == today) {
+                    "Сегодня"
+                } else {
+                    uiState.selectedDate.format(dateFormatter)
+                }
                 Text(
-                    text = "Сегодня",
+                    text = headerLabel,
                     fontSize = 13.sp,
                     color = Color.White.copy(alpha = 0.85f),
                     fontWeight = FontWeight.Normal,
@@ -242,10 +270,22 @@ private fun HomeHeader(
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
+
+        WeekNavigationRow(
+            weekRange = DateTimeUtils.formatWeekRange(uiState.currentWeekStart),
+            showTodayButton = uiState.showTodayButton,
+            canGoNext = uiState.canGoNextWeek,
+            onPreviousWeek = onPreviousWeek,
+            onNextWeek = onNextWeek,
+            onTodayClicked = onTodayClicked,
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
 
         WeekDaySelector(
             selectedDayIndex = uiState.selectedDayIndex,
+            currentWeekStart = uiState.currentWeekStart,
             onDaySelected = onDaySelected,
         )
 
@@ -342,45 +382,125 @@ private fun HeaderIconButton(icon: androidx.compose.ui.graphics.vector.ImageVect
 }
 
 @Composable
+private fun WeekNavigationRow(
+    weekRange: String,
+    showTodayButton: Boolean,
+    canGoNext: Boolean,
+    onPreviousWeek: () -> Unit,
+    onNextWeek: () -> Unit,
+    onTodayClicked: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        IconButton(onClick = onPreviousWeek) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Предыдущая неделя",
+                tint = Color.White,
+            )
+        }
+
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = weekRange,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.White,
+            )
+            if (showTodayButton) {
+                TextButton(
+                    onClick = onTodayClicked,
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                ) {
+                    Text(
+                        text = "Сегодня",
+                        fontSize = 11.sp,
+                        color = Color.White.copy(alpha = 0.85f),
+                    )
+                }
+            }
+        }
+
+        IconButton(onClick = onNextWeek, enabled = canGoNext) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = "Следующая неделя",
+                tint = if (canGoNext) Color.White else Color.White.copy(alpha = 0.3f),
+            )
+        }
+    }
+}
+
+@Composable
 private fun WeekDaySelector(
     selectedDayIndex: Int,
+    currentWeekStart: LocalDate,
     onDaySelected: (Int) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    val weekDays = listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс")
-    val startDay = 9
+    // W-3: remember исключает системный вызов на каждой рекомпозиции
+    val today = remember { LocalDate.now() }
+    val weekDayNames = listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс")
+    val weekDates = DateTimeUtils.weekDates(currentWeekStart)
 
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        weekDays.forEachIndexed { index, day ->
-            val onDayClick = remember(index) { { onDaySelected(index) } }
+        weekDates.forEachIndexed { index, date ->
+            val isFuture = date.isAfter(today)
+            val isSelected = selectedDayIndex == index
+            val isToday = date == today
+
             Column(
                 modifier = Modifier
                     .width(40.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(
-                        if (selectedDayIndex == index) {
-                            Color.White.copy(alpha = 0.25f)
-                        } else {
-                            Color.Transparent
+                        when {
+                            isSelected -> Color.White.copy(alpha = 0.25f)
+                            else -> Color.Transparent
                         },
-                    ).clickable(onClick = onDayClick)
+                    )
+                    .then(
+                        if (!isFuture) {
+                            Modifier.clickable { onDaySelected(index) }
+                        } else {
+                            Modifier
+                        },
+                    )
                     .padding(vertical = 6.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
-                    text = day,
+                    text = weekDayNames[index],
                     fontSize = 10.sp,
-                    color = Color.White.copy(alpha = 0.7f),
+                    color = if (isFuture) Color.White.copy(alpha = 0.3f)
+                    else Color.White.copy(alpha = 0.7f),
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = (startDay + index).toString(),
+                    text = date.dayOfMonth.toString(),
                     fontSize = 15.sp,
-                    fontWeight = if (selectedDayIndex == index) FontWeight.ExtraBold else FontWeight.Medium,
-                    color = Color.White,
+                    fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Medium,
+                    color = when {
+                        isFuture -> Color.White.copy(alpha = 0.3f)
+                        else -> Color.White
+                    },
                 )
+                if (isToday && !isSelected) {
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Box(
+                        modifier = Modifier
+                            .size(4.dp)
+                            .clip(RoundedCornerShape(2.dp))
+                            .background(Color.White.copy(alpha = 0.8f)),
+                    )
+                }
             }
         }
     }
@@ -548,6 +668,9 @@ private fun HomeScreenPreview() {
             onMealAddClick = {},
             onNavigateToSearch = { _, _ -> },
             onDaySelected = {},
+            onPreviousWeek = {},
+            onNextWeek = {},
+            onTodayClicked = {},
             onAddWaterGlass = {},
             onDeleteItem = {},
             onEditItem = {},
@@ -575,9 +698,42 @@ private fun HomeScreenPreviewDark() {
             onMealAddClick = {},
             onNavigateToSearch = { _, _ -> },
             onDaySelected = {},
+            onPreviousWeek = {},
+            onNextWeek = {},
+            onTodayClicked = {},
             onAddWaterGlass = {},
             onDeleteItem = {},
             onEditItem = {},
+        )
+    }
+}
+
+@Preview(name = "WeekNavigationRow - Current Week", showBackground = true, backgroundColor = 0xFF5C7EE6)
+@Composable
+private fun WeekNavigationRowCurrentWeekPreview() {
+    FoodTrackerTheme {
+        WeekNavigationRow(
+            weekRange = "24 – 30 фев",
+            showTodayButton = false,
+            canGoNext = false,
+            onPreviousWeek = {},
+            onNextWeek = {},
+            onTodayClicked = {},
+        )
+    }
+}
+
+@Preview(name = "WeekNavigationRow - Past Week", showBackground = true, backgroundColor = 0xFF5C7EE6)
+@Composable
+private fun WeekNavigationRowPastWeekPreview() {
+    FoodTrackerTheme {
+        WeekNavigationRow(
+            weekRange = "17 – 23 фев",
+            showTodayButton = true,
+            canGoNext = true,
+            onPreviousWeek = {},
+            onNextWeek = {},
+            onTodayClicked = {},
         )
     }
 }

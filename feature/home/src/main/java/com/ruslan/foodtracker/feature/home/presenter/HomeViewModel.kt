@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.ruslan.foodtracker.core.ui.components.FoodItemData
 import com.ruslan.foodtracker.domain.model.FoodEntry
 import com.ruslan.foodtracker.domain.model.MealType
+import com.ruslan.foodtracker.core.common.util.DateTimeUtils
 import com.ruslan.foodtracker.domain.model.doActionIfError
 import com.ruslan.foodtracker.domain.model.doActionIfLoading
 import com.ruslan.foodtracker.domain.model.doActionIfSuccess
@@ -40,17 +41,108 @@ class HomeViewModel
 
         private var loadJob: Job? = null
 
+        // Кэш хранится в ViewModel, а не в UiState — исключает shallow copy при каждом copy().
+        // Доступ безопасен без синхронизации: viewModelScope использует Dispatchers.Main,
+        // который однопоточен — все корутины выполняются последовательно на главном потоке.
+        private val entriesCache = mutableMapOf<LocalDate, List<FoodEntry>>()
+
         init {
             loadEntriesForSelectedDate()
         }
 
         fun onDateSelected(date: LocalDate) {
-            _uiState.value = _uiState.value.copy(selectedDate = date)
+            val today = LocalDate.now()
+            val newWeekStart = DateTimeUtils.weekStart(date)
+            val todayWeekStart = DateTimeUtils.weekStart(today)
+            _uiState.value = _uiState.value.copy(
+                selectedDate = date,
+                selectedDayIndex = date.dayOfWeek.value - 1,
+                currentWeekStart = newWeekStart,
+                showTodayButton = newWeekStart != todayWeekStart,
+                canGoNextWeek = newWeekStart < todayWeekStart,
+            )
             loadEntriesForSelectedDate()
         }
 
+        /**
+         * Пользователь нажал на конкретный день в полосе.
+         * [dayIndex] — 0-based индекс дня текущей недели (0=Пн, 6=Вс).
+         * Блокируем выбор будущих дней.
+         */
         fun onDaySelected(dayIndex: Int) {
-            _uiState.value = _uiState.value.copy(selectedDayIndex = dayIndex)
+            val newDate = _uiState.value.currentWeekStart.plusDays(dayIndex.toLong())
+            val today = LocalDate.now()
+            if (newDate.isAfter(today)) return
+            _uiState.value = _uiState.value.copy(
+                selectedDate = newDate,
+                selectedDayIndex = dayIndex,
+            )
+            loadEntriesForSelectedDate()
+        }
+
+        /**
+         * Пользователь нажал стрелку «‹» — переход на прошлую неделю.
+         * Выбранный день остаётся тем же индексом, но уже в контексте новой недели.
+         * Если дата оказывается в будущем — выбираем последний доступный день недели.
+         */
+        fun onPreviousWeek() {
+            val newWeekStart = _uiState.value.currentWeekStart.minusWeeks(1)
+            val today = LocalDate.now()
+            val targetDate = newWeekStart.plusDays(_uiState.value.selectedDayIndex.toLong())
+            val clampedDate = if (targetDate.isAfter(today)) today else targetDate
+            val clampedIndex = clampedDate.dayOfWeek.value - 1
+
+            _uiState.value = _uiState.value.copy(
+                currentWeekStart = newWeekStart,
+                selectedDate = clampedDate,
+                selectedDayIndex = clampedIndex,
+                showTodayButton = newWeekStart != DateTimeUtils.weekStart(today),
+                canGoNextWeek = true, // из прошлой недели всегда можно идти вперёд
+            )
+            loadEntriesForSelectedDate()
+        }
+
+        /**
+         * Пользователь нажал стрелку «›» — переход на следующую неделю.
+         * Переход запрещён, если текущая неделя == неделя сегодняшнего дня.
+         */
+        fun onNextWeek() {
+            val today = LocalDate.now()
+            val currentWeekStart = _uiState.value.currentWeekStart
+            val todayWeekStart = DateTimeUtils.weekStart(today)
+
+            if (currentWeekStart >= todayWeekStart) return
+
+            val newWeekStart = currentWeekStart.plusWeeks(1)
+            val targetDate = newWeekStart.plusDays(_uiState.value.selectedDayIndex.toLong())
+            val clampedDate = if (targetDate.isAfter(today)) today else targetDate
+            val clampedIndex = clampedDate.dayOfWeek.value - 1
+            val isNowCurrentWeek = newWeekStart == todayWeekStart
+
+            _uiState.value = _uiState.value.copy(
+                currentWeekStart = newWeekStart,
+                selectedDate = clampedDate,
+                selectedDayIndex = clampedIndex,
+                showTodayButton = !isNowCurrentWeek,
+                canGoNextWeek = !isNowCurrentWeek, // нельзя идти вперёд с текущей недели
+            )
+            loadEntriesForSelectedDate()
+        }
+
+        /**
+         * Пользователь нажал кнопку «Сегодня».
+         * Возвращает навигатор на текущую неделю и выбирает сегодня.
+         */
+        fun onTodayClicked() {
+            val today = LocalDate.now()
+            _uiState.value = _uiState.value.copy(
+                currentWeekStart = DateTimeUtils.weekStart(today),
+                selectedDate = today,
+                selectedDayIndex = today.dayOfWeek.value - 1,
+                showTodayButton = false,
+                canGoNextWeek = false, // на текущей неделе нельзя идти вперёд
+            )
+            loadEntriesForSelectedDate()
         }
 
         fun onAddWaterGlass() {
@@ -68,6 +160,7 @@ class HomeViewModel
                         pendingDeleteEntry = entry,
                         showDeleteSnackbar = true,
                     )
+                    invalidateCacheForDate(_uiState.value.selectedDate)
                     loadEntriesForSelectedDate()
                 }
             }
@@ -82,6 +175,7 @@ class HomeViewModel
                         pendingDeleteEntry = null,
                         showDeleteSnackbar = false,
                     )
+                    invalidateCacheForDate(_uiState.value.selectedDate)
                     loadEntriesForSelectedDate()
                 }
             }
@@ -130,6 +224,7 @@ class HomeViewModel
             viewModelScope.launch {
                 updateFoodEntryUseCase(updated).doActionIfSuccess {
                     _uiState.value = _uiState.value.copy(editingEntry = null)
+                    invalidateCacheForDate(_uiState.value.selectedDate)
                     loadEntriesForSelectedDate()
                 }
             }
@@ -141,44 +236,23 @@ class HomeViewModel
             loadJob?.cancel()
             loadJob = viewModelScope.launch {
                 val selectedDate = _uiState.value.selectedDate
+
+                // Проверяем приватный кэш: если данные есть — рендерим сразу без Loading
+                val cached = entriesCache[selectedDate]
+                if (cached != null) {
+                    applyEntriesToState(cached)
+                    return@launch
+                }
+
                 getEntriesByDateUseCase(selectedDate).collect { result ->
                     result.doActionIfLoading {
                         _uiState.value = _uiState.value.copy(isLoading = true, error = null)
                     }
 
                     result.doActionIfSuccess { entries ->
-                        val groupedEntries = entries.groupBy { it.mealType }
-
-                        val totalCalories = entries.sumOf { it.calories }.toFloat()
-                        val totalProtein = entries.sumOf { it.protein }.toFloat()
-                        val totalFat = entries.sumOf { it.fat }.toFloat()
-                        val totalCarbs = entries.sumOf { it.carbs }.toFloat()
-
-                        val targetCalories = 2200f
-                        val targetProtein = 140f
-                        val targetFat = 73f
-                        val targetCarbs = 275f
-                        val targetFiber = 30f
-
-                        val meals = listOf(
-                            createMealData(MealType.BREAKFAST, "🌅", "Завтрак", groupedEntries),
-                            createMealData(MealType.LUNCH, "☀️", "Обед", groupedEntries),
-                            createMealData(MealType.DINNER, "🌙", "Ужин", groupedEntries),
-                            createMealData(MealType.SNACK, "🍎", "Перекус", groupedEntries),
-                        )
-
-                        _uiState.value = _uiState.value.copy(
-                            allEntries = entries,
-                            consumedCalories = totalCalories,
-                            targetCalories = targetCalories,
-                            protein = MacroData(consumed = totalProtein, target = targetProtein),
-                            fat = MacroData(consumed = totalFat, target = targetFat),
-                            carbs = MacroData(consumed = totalCarbs, target = targetCarbs),
-                            fiber = MacroData(consumed = 0f, target = targetFiber),
-                            meals = meals,
-                            isLoading = false,
-                            error = null,
-                        )
+                        // Сохраняем в приватный кэш — нет race condition и лишних copy()
+                        entriesCache[selectedDate] = entries
+                        applyEntriesToState(entries)
                     }
 
                     result.doActionIfError {
@@ -189,6 +263,44 @@ class HomeViewModel
                     }
                 }
             }
+        }
+
+        private fun applyEntriesToState(entries: List<FoodEntry>) {
+            val groupedEntries = entries.groupBy { it.mealType }
+            val totalCalories = entries.sumOf { it.calories }.toFloat()
+            val totalProtein = entries.sumOf { it.protein }.toFloat()
+            val totalFat = entries.sumOf { it.fat }.toFloat()
+            val totalCarbs = entries.sumOf { it.carbs }.toFloat()
+
+            val targetCalories = 2200f
+            val targetProtein = 140f
+            val targetFat = 73f
+            val targetCarbs = 275f
+            val targetFiber = 30f
+
+            val meals = listOf(
+                createMealData(MealType.BREAKFAST, "🌅", "Завтрак", groupedEntries),
+                createMealData(MealType.LUNCH, "☀️", "Обед", groupedEntries),
+                createMealData(MealType.DINNER, "🌙", "Ужин", groupedEntries),
+                createMealData(MealType.SNACK, "🍎", "Перекус", groupedEntries),
+            )
+
+            _uiState.value = _uiState.value.copy(
+                allEntries = entries,
+                consumedCalories = totalCalories,
+                targetCalories = targetCalories,
+                protein = MacroData(consumed = totalProtein, target = targetProtein),
+                fat = MacroData(consumed = totalFat, target = targetFat),
+                carbs = MacroData(consumed = totalCarbs, target = targetCarbs),
+                fiber = MacroData(consumed = 0f, target = targetFiber),
+                meals = meals,
+                isLoading = false,
+                error = null,
+            )
+        }
+
+        private fun invalidateCacheForDate(date: LocalDate) {
+            entriesCache.remove(date)
         }
 
         private fun createMealData(
@@ -227,7 +339,7 @@ class HomeViewModel
  */
 data class HomeUiState(
     val selectedDate: LocalDate = LocalDate.now(),
-    val selectedDayIndex: Int = 0,
+    val selectedDayIndex: Int = LocalDate.now().dayOfWeek.value - 1, // 0=Пн … 6=Вс
     val consumedCalories: Float = 0f,
     val targetCalories: Float = 2200f,
     val protein: MacroData = MacroData(0f, 140f),
@@ -246,6 +358,22 @@ data class HomeUiState(
     // Запись, удалённая последней (для Undo)
     val pendingDeleteEntry: FoodEntry? = null,
     val showDeleteSnackbar: Boolean = false,
+    /**
+     * Понедельник отображаемой недели.
+     * По умолчанию — начало текущей недели.
+     */
+    val currentWeekStart: LocalDate = DateTimeUtils.weekStart(LocalDate.now()),
+    /**
+     * Показывать ли кнопку «Сегодня».
+     * true, если отображаемая неделя != текущая неделя.
+     */
+    val showTodayButton: Boolean = false,
+    /**
+     * Можно ли перейти на следующую неделю.
+     * false если уже на текущей неделе (нет будущих недель).
+     * Вычисляется в ViewModel — не в Composable, избегая LocalDate.now() при рекомпозиции.
+     */
+    val canGoNextWeek: Boolean = false,
 )
 
 /**
